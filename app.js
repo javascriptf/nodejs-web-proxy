@@ -5,7 +5,8 @@ var port = process.env.PORT;
 
 
 // Default web page (Hello!)
-function defaultPage(resp) {
+function DefaultPage(resp)
+{
 	console.log("Default page accessed");
 	resp.writeHead(200, {"content-type": "text/plain"});
 	resp.write("wb_Proxy: Hello!");
@@ -14,7 +15,8 @@ function defaultPage(resp) {
 
 
 // Process server response
-function onSrvrResponse(resp, srvrResp) {
+function OnServerResp(resp, srvrResp)
+{
 	// Begin reponse to proxy helper
 	console.log("Server Response started");
 	// Tweak content-length
@@ -38,7 +40,8 @@ function onSrvrResponse(resp, srvrResp) {
 
 
 // Process each user request
-function onUserRequest(req, resp) {
+function onUserRequest(req, resp)
+{
 	// Log the request URL
 	console.log("User Request: " + req.url);
 	// Goto default page on relative URL
