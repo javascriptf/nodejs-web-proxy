@@ -5,8 +5,9 @@ var fs = require('fs');
 
 
 // settings
-var port = process.env.PORT;
 var defUserAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0";
+var port = process.env.PORT;
+if(typeof port === 'undefined') port = 80;
 
 
 // ui data
@@ -27,8 +28,8 @@ function defaultPage(req, resp)
 	writeLog("Main Page accessed");
 	resp.writeHead(200, {"content-type": "text/plain"});
 
-	fs.readFile('index.html', function(err, data) {
-		if(!err) resp.end('system error');
+	fs.readFile(__dirname  + '\\index.html', function(err, data) {
+		if(!err) resp.end(__dirname);
 		else resp.end(data);
 	});
 }
