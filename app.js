@@ -17,87 +17,95 @@ var uiLog = [];
 function writeLog(log)
 {
 	console.log(log);
-	uiLog[uiLog.length] = log;
+	// uiLog[uiLog.length] = log;
 }
 
 
 // main web page
-function defaultPage(resp)
+function defaultPage(req, resp)
 {
 	writeLog("Main Page accessed");
 	resp.writeHead(200, {"content-type": "text/plain"});
-	resp.write("wb_Proxy: Hello!");
-	resp.end();
+
+	fs.readFile('index.html', function(err, data) {
+		if(!err) resp.end('system error');
+		else resp.end(data);
+	});
 }
 
 
 // process server response
-function onServerResp(resp, srvrResp)
+function onServerResp(resp, sResp)
 {
-	// Begin reponse to proxy helper
+	// begin reponse to proxy helper
 	writeLog("Server Response started");
-	// Tweak content-length
-	var srvrHeaders = srvrResp.headers;
-	srvrHeaders["server"] = srvrHeaders["content-length"];
-	srvrHeaders["transfer-encoding"] = "chunked";
-	srvrHeaders["content-length"] = 0;
-	resp.writeHead(srvrResp.statusCode, srvrHeaders);
-	srvrResp.on('data', function (chunk) {
-		// Add response data
+	// tweak content-length
+	var sHdr = sResp.headers;
+	sHdr["server"] = sHdr["content-length"];
+	sHdr["transfer-encoding"] = "chunked";
+	sHdr["content-length"] = 0;
+	resp.writeHead(sResp.statusCode, sHdr);
+	sResp.on('data', function (chunk) {
+		// add response data
 		resp.write(chunk);
 	});
-	srvrResp.on('end', function() {
-		// Complete response to proxy helper
+	sResp.on('end', function() {
+		// complete response to proxy helper
 		console.log("Server Response complete");
-		if(srvrResp.trailers != null)
-			resp.addTrailers(srvrResp.trailers);
+		if(sResp.trailers != null)
+			resp.addTrailers(sResp.trailers);
 		resp.end();
 	});
 }
 
 
-// Process each user request
+// process user request
 function onUserRequest(req, resp)
 {
-	// Log the request URL
-	console.log("User Request: " + req.url);
-	// Goto default page on relative URL
+	writeLog("Request: " + req.url);
+
+	// goto main page on root url
 	if(req.url.indexOf("/proxy") < 0) {
-		defaultPage(resp);
+		defaultPage(req, resp);
 		return;
 	}
-	// Retrieve request URL
-	console.log("Access URL: " + req.headers["user-agent"]);
-	var urlName = req.headers["user-agent"];
+
+	// retrieve request url
+	var reqUrl = req.headers["user-agent"];
 	var hostName = url.parse(urlName).host;
-	// Prepare options for the Server
-	var reqHeaders = req.headers;
-	reqHeaders["host"] = hostName;
-	reqHeaders["user-agent"] = defUserAgent;
+
+	// prepare options for the server
+	var hReq = req.headers;
+	hReq["host"] = hostName;
+	hReq["user-agent"] = defUserAgent;
 	var options = {
 		"method": req.method,
 		"host": hostName,
-		"path": urlName,
-		"port": 80,
-		"headers": reqHeaders
+		"path": reqUrl,
+		"headers": hReq
 	};
-	console.log("Server Request started");
-	var srvrReq = http.request(options, function (srvrResp) {
-		onSrvrResponse(resp, srvrResp);
+
+	writeLog("Request to Server: " + reqUrl);
+	var sReq = http.request(options, function (sResp) {
+		onSrvrResponse(resp, sResp);
 	});
-	srvrReq.on('error', function(e) {
-		console.log('Problem with request: ' + e.message);
+
+	sReq.on('error', function(err) {
+		writeLog('Problem with request: ' + err.message);
 	});
+
 	var reqData = req.read();
 	if(reqData != null)
-		srvrReq.write(reqData);
+		sReq.write(reqData);
+	
 	if(req.trailers != null)
-		srvrReq.addTrailers(req.trailers);
-	srvrReq.end();
-	console.log("Server Request complete");
+		sReq.addTrailers(req.trailers);
+	
+	sReq.end();
+	writeLog("Server Request complete");
 }
 
 
-// create HTTP server on preferred port
+// create http server on preferred port
 http.createServer(onUserRequest).listen(port);
 writeLog("Proxy started on port " + port);
