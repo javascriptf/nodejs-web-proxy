@@ -1,24 +1,41 @@
+// required headers
 var http = require("http");
 var url = require("url");
+var fs = require('fs');
 
+
+// settings
 var port = process.env.PORT;
+var defUserAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0";
 
 
-// Default web page (Hello!)
-function DefaultPage(resp)
+// ui data
+var uiLog = [];
+
+
+// write log
+function writeLog(log)
 {
-	console.log("Default page accessed");
+	console.log(log);
+	uiLog[uiLog.length] = log;
+}
+
+
+// main web page
+function defaultPage(resp)
+{
+	writeLog("Main Page accessed");
 	resp.writeHead(200, {"content-type": "text/plain"});
 	resp.write("wb_Proxy: Hello!");
 	resp.end();
 }
 
 
-// Process server response
-function OnServerResp(resp, srvrResp)
+// process server response
+function onServerResp(resp, srvrResp)
 {
 	// Begin reponse to proxy helper
-	console.log("Server Response started");
+	writeLog("Server Response started");
 	// Tweak content-length
 	var srvrHeaders = srvrResp.headers;
 	srvrHeaders["server"] = srvrHeaders["content-length"];
@@ -56,7 +73,7 @@ function onUserRequest(req, resp)
 	// Prepare options for the Server
 	var reqHeaders = req.headers;
 	reqHeaders["host"] = hostName;
-	reqHeaders["user-agent"] = "Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0";
+	reqHeaders["user-agent"] = defUserAgent;
 	var options = {
 		"method": req.method,
 		"host": hostName,
@@ -81,6 +98,6 @@ function onUserRequest(req, resp)
 }
 
 
-// Create HTTP server on preferred port
+// create HTTP server on preferred port
 http.createServer(onUserRequest).listen(port);
-console.log("Proxy started on port " + port);
+writeLog("Proxy started on port " + port);
