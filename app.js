@@ -1,112 +1,53 @@
-// required headers
-var http = require("http");
-var url = require("url");
-var fs = require('fs');
+// required modules
+var express = require('express');
+var app = express();
+
+var apiOs = require("code/apiOs.js");
+var apiLog = require('code/apiLog.js');
+var apiRoot = require('code/apiRoot.js');
+var apiProxy = require('code/apiProxy.js')
 
 
 // settings
-var defUserAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0";
-var port = process.env.PORT;
-if(typeof port === 'undefined') port = 80;
+var usrAgent = 'Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0';
+var port = process.env.PORT || 80;
 
 
-// ui data
-var uiLog = [];
+// information
+var appName = 'web_Proxy';
+var reqUrls = appLog();
+var log = appLog();
 
 
-// write log
-function writeLog(log)
-{
-	console.log(log);
-	// uiLog[uiLog.length] = log;
-}
+// setup modules
+apiOs.log = log;
+apiRoot.log = log;
+apiProxy.log = log;
+apiProcess.log = log;
+
+appOs.log = log;
+appProcess.log = log;
 
 
-// main web page
-function defaultPage(req, resp)
-{
-	writeLog("Main Page accessed");
-	resp.writeHead(200, {"content-type": "text/plain"});
-
-	fs.readFile(__dirname  + '\\index.html', function(err, data) {
-		if(!err) resp.end(__dirname);
-		else resp.end(data);
-	});
-}
-
-
-// process server response
-function onServerResp(resp, sResp)
-{
-	// begin reponse to proxy helper
-	writeLog("Server Response started");
-	// tweak content-length
-	var sHdr = sResp.headers;
-	sHdr["server"] = sHdr["content-length"];
-	sHdr["transfer-encoding"] = "chunked";
-	sHdr["content-length"] = 0;
-	resp.writeHead(sResp.statusCode, sHdr);
-	sResp.on('data', function (chunk) {
-		// add response data
-		resp.write(chunk);
-	});
-	sResp.on('end', function() {
-		// complete response to proxy helper
-		console.log("Server Response complete");
-		if(sResp.trailers != null)
-			resp.addTrailers(sResp.trailers);
-		resp.end();
-	});
-}
+// routing
+app.get('/', function(req, res) { apiRoot.page(reg, res); });
+app.get('/proxy', function(req, res) { apiProxy.page(req, res); });
+app.get('/log/read', function(req, res) { apiLog.read(req, res); });
+app.get('/os/info', function(req, res) { apiOs.info(req, res); });
+app.get('/os/memoryusage', function(req, res) { apiOs.memoryUsage(req, res); });
+app.get('/os/runtime', function(req, res) { apiOs.runTime(req, res); });
+app.get('/process/info', function(req, res) { apiProcess.info(req, res); });
+app.get('/process/memoryusage', function(req, res) { apiProcess.memoryUsage(req, res); });
+app.get('/process/runtime', function(req, res) { apiProcess.runTime(req, res); });
+// static files
+app.use('/assets', express.static(__dirname + '/assets'));
+// on wrong path
+app.use(function(req, res, next) {
+  res.send(404, 'Something broke!');
+});
 
 
-// process user request
-function onUserRequest(req, resp)
-{
-	writeLog("Request: " + req.url);
-
-	// goto main page on root url
-	if(req.url.indexOf("/proxy") < 0) {
-		defaultPage(req, resp);
-		return;
-	}
-
-	// retrieve request url
-	var reqUrl = req.headers["user-agent"];
-	var hostName = url.parse(urlName).host;
-
-	// prepare options for the server
-	var hReq = req.headers;
-	hReq["host"] = hostName;
-	hReq["user-agent"] = defUserAgent;
-	var options = {
-		"method": req.method,
-		"host": hostName,
-		"path": reqUrl,
-		"headers": hReq
-	};
-
-	writeLog("Request to Server: " + reqUrl);
-	var sReq = http.request(options, function (sResp) {
-		onSrvrResponse(resp, sResp);
-	});
-
-	sReq.on('error', function(err) {
-		writeLog('Problem with request: ' + err.message);
-	});
-
-	var reqData = req.read();
-	if(reqData != null)
-		sReq.write(reqData);
-	
-	if(req.trailers != null)
-		sReq.addTrailers(req.trailers);
-	
-	sReq.end();
-	writeLog("Server Request complete");
-}
-
-
-// create http server on preferred port
-http.createServer(onUserRequest).listen(port);
-writeLog("Proxy started on port " + port);
+// create http server
+var server = app.listen(port, function() {
+	console.log('Proxy started on port ' + port);
+});

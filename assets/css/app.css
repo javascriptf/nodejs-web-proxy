@@ -1,0 +1,19 @@
+.hero {
+	background-color: #468768;
+	padding: 20px;
+}
+
+.head {
+	margin: 0px;
+	color: black;
+	background: #e3e3e3;
+}
+
+.head li {
+	display: inline;
+	background: red;
+}
+
+.foot p{
+	margin: 0px;
+}

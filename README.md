@@ -5,6 +5,43 @@ Free Node.js proxy server
 
 
 
+The objective is to be able to monitor the proxy while it operates and be able
+to control it to a certain extent.
+
+Monitor:
+
+1.  Start Time: to determine if the server restarts anytime??
+
+2.  Current Time: useful info to get to compare with the start time
+
+3.  App Name- it is a must
+
+4.  Fetch address:
+
+5.  Protocol mode:
+
+6.  Access Domain:
+
+7.  Access File:
+
+8.  Chunk size:
+
+9.  Header info:
+
+10. Trailers:
+
+11. Log:
+
+
+
+Control:
+
+1.  Pre-download:
+
+2.  File-retrieve:
+
+3.  Act as gateway (router)
+
 
 
 
