@@ -7,17 +7,16 @@ var url = require('url');
 var express = require('express');
 
 var web = express();
+var app = {};
 
 
 
 // -------------
 // Configuration
 // -------------
-var app = {
-	'config': {
-		'usrAgent': 'Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0',
-		'port': process.env.PORT || 80	
-	}
+app.config = {
+	'usrAgent': 'Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0',
+	'port': process.env.PORT || 80
 };
 
 
@@ -45,12 +44,12 @@ app.sendHtml = function(res, file) {
 // Collection Support
 // ------------------
 var coll = {
+	// add a new item to a max size collection
 	add: function(arr, item, max) {
-		var maxLen = max || 32;
-		var i = arr.length;
-		if(i > maxLen) arr.shift();
-		arr[i] = item;
-		return i;
+		var rem = (arr.length > (max || 32));
+		if(rem) arr.shift();
+		arr[arr.length] = item;
+		return rem;
 	}
 };
 
@@ -63,9 +62,12 @@ var log = {
 	data: [],
 	maxLen: 32,
 
+	// clear logs
 	clear: function() {
 		this.data = [];
 	},
+
+	// add new log and send to console
 	add: function(msg) {
 		if(this.data.length > this.maxLen) this.data.shift();
 		this.data[this.data.length] = msg;
@@ -157,7 +159,11 @@ app.runtime = {
 			'request': [],
 			'response': []
 		},
-		''
+		'failed': {
+			'id': [],
+			'request': [],
+			'response': []
+		}
 	}
 };
 
@@ -202,9 +208,15 @@ app.addProxyRequest = function(req) {
 	++app.proxy.request.pending;
 	var id = ++app.proxy.request.total;
 	var reqUrl = req.headers['user-agent'];
-	var arp = app.runtime.proxy;
-	coll.add(arp.id, id);
-	coll.add(arp.request, {
+	var pxy = app.runtime.proxy;
+	if(pxy.active.id.length >= 32 &&
+		(pxy.active.response[0] === undefined ||
+			pxy.active.response[0].complete == false)) {
+		coll.add(pxy.failed.id, pxy.active.id[0]);
+		coll.add(pxy.failed)
+	}
+	coll.add(pxy.id, id);
+	coll.add(pxy.request, {
 		'time': process.hrtime()[0],
 		'path': reqUrl,
 		'host': url.parse(reqUrl).host,
@@ -219,19 +231,18 @@ app.addProxyRequest = function(req) {
 
 // complete proxy request
 app.completeProxyRequest = function(id) {
-	var arp = app.runtime.proxy;
-	var i = arp.id.indexOf(id);
-	if(i >= 0) arp.request[i].complete = true;
+	var pxy = app.runtime.proxy;
+	var i = pxy.id.indexOf(id);
+	if(i >= 0) pxy.request[i].complete = true;
 };
 
 // add proxy response info
 app.addProxyResponse = function(id, res) {
 	--app.proxy.request.pending;
 	++app.proxy.response.total;
-	var arp = app.runtime.proxy;
-	var i = arp.id.indexOf(id);
-	if(i < 0) return;
-	apr.response[i] = {
+	var pxy = app.runtime.proxy;
+	var i = pxy.id.indexOf(id);
+	if(i >= 0) pxy.response[i] = {
 		'time': process.hrtime()[0],
 		'status': res.statusCode,
 		'headers': res.headers,
@@ -330,6 +341,12 @@ web.all('/proxy', function(req, res) {
 // -------
 // Web API
 // -------
+
+// get app config
+web.get('/config', function(req, res) {
+	log.add('Config API accessed.');
+	app.sendJson(res, app.config);
+});
 
 // read current log
 web.get('/info/log', function(req, res) {
