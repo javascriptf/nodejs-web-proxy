@@ -46,10 +46,8 @@ app.sendHtml = function(res, file) {
 var coll = {
 	// add a new item to a max size collection
 	add: function(arr, item, max) {
-		var rem = (arr.length > (max || 32));
-		if(rem) arr.shift();
+		if(arr.length > (max || 32)) arr.shift();
 		arr[arr.length] = item;
-		return rem;
 	}
 };
 
@@ -208,15 +206,15 @@ app.addProxyRequest = function(req) {
 	++app.proxy.request.pending;
 	var id = ++app.proxy.request.total;
 	var reqUrl = req.headers['user-agent'];
-	var pxy = app.runtime.proxy;
-	if(pxy.active.id.length >= 32 &&
-		(pxy.active.response[0] === undefined ||
-			pxy.active.response[0].complete == false)) {
-		coll.add(pxy.failed.id, pxy.active.id[0]);
-		coll.add(pxy.failed)
+	var pxya = app.runtime.proxy.active;
+	if(pxya.id.length >= 32 && (pxya.response[0] === undefined || pxya.response[0].complete === false)) {
+		var pxyf = app.runtime.proxy.failed;
+		coll.add(pxyf.id, pxya.id[0]);
+		coll.add(pxyf.request, pxya.request[0]);
+		coll.add(pxyf.response, pxya.response[0])
 	}
-	coll.add(pxy.id, id);
-	coll.add(pxy.request, {
+	coll.add(pxya.id, id);
+	coll.add(pxya.request, {
 		'time': process.hrtime()[0],
 		'path': reqUrl,
 		'host': url.parse(reqUrl).host,
@@ -231,7 +229,7 @@ app.addProxyRequest = function(req) {
 
 // complete proxy request
 app.completeProxyRequest = function(id) {
-	var pxy = app.runtime.proxy;
+	var pxy = app.runtime.proxy.active;
 	var i = pxy.id.indexOf(id);
 	if(i >= 0) pxy.request[i].complete = true;
 };
@@ -240,7 +238,7 @@ app.completeProxyRequest = function(id) {
 app.addProxyResponse = function(id, res) {
 	--app.proxy.request.pending;
 	++app.proxy.response.total;
-	var pxy = app.runtime.proxy;
+	var pxy = app.runtime.proxy.active;
 	var i = pxy.id.indexOf(id);
 	if(i >= 0) pxy.response[i] = {
 		'time': process.hrtime()[0],
@@ -254,9 +252,9 @@ app.addProxyResponse = function(id, res) {
 
 // complete proxy response
 app.completeProxyResponse = function(id) {
-	var arp = app.runtime.proxy;
-	var i = arp.id.indexOf(id);
-	if(i >= 0) arp.response[i].complete = true;
+	var pxy = app.runtime.proxy.active;
+	var i = pxy.id.indexOf(id);
+	if(i >= 0) pxy.response[i].complete = true;
 };
 
 // update proxy info
@@ -289,7 +287,7 @@ function onServerResp(id, res, sRes) {
 	sHdr['transfer-encoding'] = 'chunked';
 	sHdr['content-length'] 	= 0;
 	app.addProxyResponse(id, res);
-	log.add('['+id+']Server Response started.');
+	log.add('['+id+'] Server Response started.');
 	res.writeHead(sRes.statusCode, sHdr);
 	sRes.on('data', function (chunk) {
 		res.write(chunk);
@@ -298,15 +296,16 @@ function onServerResp(id, res, sRes) {
 		if(sRes.trailers != null)
 			res.addTrailers(sRes.trailers);
 		res.end();
-		log.add('Server Response complete.');
+		log.add('['+id+'] Server Response complete.');
 		app.completeProxyResponse(id);
 	});
 }
 
 
-// process proxy request [! will only serve get requests!!!]
-web.all('/proxy', function(req, res) {
+// process proxy request
+web.all('/run/proxy', function(req, res) {
 	// prepare remote request options
+	log.add('Run[proxy] API accessed.');
 	var hReq = req.headers;
 	var reqUrl = hReq['user-agent'];
 	var hostName = url.parse(reqUrl).host;
@@ -324,7 +323,7 @@ web.all('/proxy', function(req, res) {
 		onSrvrResponse(id, res, sRes);
 	});
 	sReq.on('error', function(err) {
-		log.add('['+id+']Problem with request: ' + err.message);
+		log.add('['+id+'] Problem with request: ' + err.message);
 	});
 	var reqData = req.read();
 	if(reqData != null)
@@ -333,7 +332,7 @@ web.all('/proxy', function(req, res) {
 		sReq.addTrailers(req.trailers);
 	sReq.end();
 	app.completeProxyRequest(id);
-	log.add('['+id+']Server Request complete');
+	log.add('['+id+'] Server Request complete');
 });
 
 
@@ -349,45 +348,69 @@ web.get('/config', function(req, res) {
 });
 
 // read current log
-web.get('/info/log', function(req, res) {
+web.get('/log', function(req, res) {
 	log.add('Log API accessed.');
 	app.sendJson(res, log.data);
 });
 
 // get system info
-web.get('/info/system', function(req, res) {
+web.get('/system', function(req, res) {
 	app.updateSystem();
 	log.add('System API accessed.');
 	app.sendJson(res, app.system);
 });
 
 // get process info
-web.get('/info/process', function(req, res) {
+web.get('/process', function(req, res) {
 	app.updateProcess();
 	log.add('Process API accessed.');
 	app.sendJson(res, app.process);
 });
 
+// get proxy info
+web.get('/proxy', function(req, res) {
+	log.add('Proxy API accessed.');
+	app.sendJson(res, app.proxy);
+});
+
 // get runtime info
-web.get('/info/runtime', function(req, res) {
+web.get('/runtime', function(req, res) {
 	log.add('Runtime API accessed.');
 	app.sendJson(res, app.runtime);
 });
 
 // get runtime[system] info
-web.get('/info/runtime/system', function(req, res) {
+web.get('/runtime/system', function(req, res) {
 	log.add('Runtime[system] API accessed.');
 	app.sendJson(res, app.runtime.system);
 });
 
 // get runtime[process] info
-web.get('/info/runtime/process', function(req, res) {
+web.get('/runtime/process', function(req, res) {
 	log.add('Runtime[process] API accessed.');
 	app.sendJson(res, app.runtime.process);
 });
 
+// get runtime[proxy] info
+web.get('/runtime/proxy', function(req, res) {
+	log.add('Runtime[proxy] API accessed.');
+	app.sendJson(res, app.runtime.proxy)
+});
+
+// get runtime[proxy][active] info
+web.get('/runtime/proxy/active', function(req, res) {
+	log.add('Runtime[proxy][active] API accessed.');
+	app.sendJson(res, app.runtime.proxy.active);
+});
+
+// get runtime[proxy][failed] info
+web.get('/runtime/proxy/failed', function(req, res) {
+	log.add('Runtime[proxy][failed] API accessed.');
+	app.sendJson(res, app.runtime.proxy.failed);
+});
+
 // get headers
-web.get('/info/headers', function(req, res) {
+web.get('/headers', function(req, res) {
 	log.add('Headers API accessed.');
 	app.sendJson(res, req.headers);
 });
@@ -422,5 +445,6 @@ var server = web.listen(app.config.port, function() {
 	log.add('Proxy started on port ' + app.config.port);
 	setInterval(function() {
 		app.updateRuntime();
-	}, 1000);
+		app.updateProxy();
+	}, 60000);
 });
