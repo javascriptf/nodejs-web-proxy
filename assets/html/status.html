@@ -22,14 +22,29 @@
 
 
 <div class="body">
-	<div class="jumbotron">
-		<p>
-			Web Proxy is an free HTTP-only proxy that enables access to websites that might have been blocked by your internet provider.
-			It also enables you to bypass any maximum file size rectriction imposed by your internet provider.
-		</p>
-		<a href="/" class="btn btn-primary">Getting Started</a>
-		<a href="/" class="btn btn-default">Running Status</a>
+	<h3>System</h3>
+	<div>Name: {{system.name}}</div>
+	<div>Time: {{system.time}}</div>
+	<div>Uptime: {{system.uptime}}</div>
+	<div>
+		<h4>Memory</h4>
+		<div>Free: {{system.mem.free}}</div>
+		<div>Total: {{system.mem.total}}</div>
 	</div>
+	<div>Load: {{system.load}}</div>
+	<div>
+		<h4>OS</h4>
+		<div>Type: {{system.os.type}}</div>
+		<div>Release: {{system.os.release}}</div>
+		<div>Platform: {{system.os.platform}}</div>
+	</div>
+	<div>
+		<h4>CPU</h4>
+		<div>Type: {{system.cpu.type}}</div>
+		<div>Architecture: {{system.os.arch}}</div>
+		<div>Endian: {{system.os.endian}}</div>
+	</div>
+	<div>Network: {{system.network}}</div>
 </div>
 
 

@@ -1,12 +1,15 @@
-.hero {
-	background-color: #468768;
-	padding: 20px;
+.jumbotron p {
+	margin-top: 2em;
+	margin-bottom: 2em;
 }
 
 .head {
-	margin: 0px;
-	color: black;
+	padding: 1em 0.5em 1em 2em;
 	background: #e3e3e3;
+}
+
+.head h1 {
+	
 }
 
 .head li {

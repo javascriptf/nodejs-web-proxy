@@ -427,6 +427,12 @@ web.get('/', function(req, res) {
 	app.sendHtml(res, 'assets/html/index.html');
 });
 
+// status web page
+web.get('/web/status', function(req, res) {
+	log.add('Status Web page accessed');
+	app.sendHtml(res, 'assets/html/status.html');
+})
+
 // static files
 web.use(express.static(__dirname + '/assets'));
 
