@@ -10,4 +10,5 @@ modules.exports = function(inj) {
 		arr[arr.length] = item;
 	};
 
+	return inj;
 };

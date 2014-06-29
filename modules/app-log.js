@@ -21,4 +21,5 @@ module.exports = function(inj) {
 		}
 	};
 
+	return inj;
 };

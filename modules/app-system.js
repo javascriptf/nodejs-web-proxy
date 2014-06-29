@@ -6,8 +6,7 @@
 var os = require('os');
 var appColl = require('./app-coll.js');
 
-var coll = {};
-appColl(coll);
+var coll = appColl({});
 
 
 module.exports = function(inj) {
@@ -61,4 +60,5 @@ module.exports = function(inj) {
 		coll.add(sys.load, os.loadavg()[0]);
 	};
 
+	return inj;
 };
