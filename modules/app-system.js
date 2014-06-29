@@ -9,6 +9,7 @@ var appColl = require('./app-coll.js');
 var coll = {};
 appColl(coll);
 
+
 module.exports = function(inj) {
 
 	// initialize system info

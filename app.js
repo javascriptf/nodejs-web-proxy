@@ -14,10 +14,10 @@ var appConfig = require('./modules/app-config.js');
 var web = express();
 
 var app = {};
-app = appLog(app);
-app = appColl(app);
-app = appSend(app);
-app = appConfig(app);
+appLog(app);
+appColl(app);
+appSend(app);
+appConfig(app);
 
 
 
@@ -25,46 +25,7 @@ app = appConfig(app);
 // App Info
 // --------
 
-// initialize system info
-app.system = {
-	'name': os.hostname(),
-	'tmpdir': os.tmpdir(),
-	'time': process.hrtime()[0],
-	'uptime': os.uptime(),
-	'mem': {
-		'total': os.totalmem(),
-		'free': os.freemem(),
-	},
-	'load': os.loadavg()[0],
-	'os': {
-		'type': os.type(),
-		'release': os.release(),
-		'platform': os.platform()
-	},
-	'cpu': {
-		'type': os.cpus(),
-		'arch': os.arch(),
-		'endian': os.endianness()
-	},
-	'network': os.networkInterfaces()
-};
-
 // initialize process info
-app.process = {
-	'pid': process.pid,
-	'env': process.env,
-	'argv': process.argv,
-	'title': process.title,
-	'uptime': process.uptime(),
-	'execPath': process.execPath,
-	'execArgv': process.execArgv,
-	'startTime': process.hrtime()[0],
-	'mem': {
-		'heapTotal': 0,
-		'heapUsed': 0,
-		'rss': 0
-	}
-};
 
 // initialize proxy info
 app.proxy = {
@@ -83,20 +44,6 @@ app.proxy = {
 
 // initialize runtime info
 app.runtime = {
-	'system': {
-		'time': [],
-		'mem': {
-			'free': []
-		},
-		'load': []
-	},
-	'process': {
-		'mem': {
-			'heapTotal': [],
-			'heapUsed': [],
-			'rss': []
-		}
-	},
 	'proxy': {
 		'rate': {
 			'request': [],
@@ -113,42 +60,6 @@ app.runtime = {
 			'response': []
 		}
 	}
-};
-
-// update info
-app.updateSystem = function() {
-	var sys = app.system;
-	sys.time = process.hrtime()[0];
-	sys.uptime = os.uptime();
-	sys.mem.free = os.freemem();
-	sys.load = os.loadavg()[0];
-};
-
-// update info
-app.updateProcess = function() {
-	var pro = app.process;
-	var mem = process.memoryUsage();
-	pro.uptime = process.uptime();
-	pro.mem.heapTotal = mem.heapTotal;
-	pro.mem.heapUsed = mem.heapUsed;
-	pro.mem.rss = mem.rss;
-};
-
-// update runtime system info
-app.updateRuntimeSystem = function() {
-	var sys = app.runtime.system;
-	coll.add(sys.time, process.hrtime()[0]);
-	coll.add(sys.mem.free, os.freemem());
-	coll.add(sys.load, os.loadavg()[0]);
-}
-
-// update runtime process info
-app.updateRuntimeProcess = function() {
-	var pro = app.runtime.process;
-	var mem = process.memoryUsage();
-	coll.add(pro.mem.heapTotal, mem.heapTotal);
-	coll.add(pro.mem.heapUsed, mem.heapUsed);
-	coll.add(pro.mem.rss, mem.rss);
 };
 
 // add proxy request info
