@@ -10,46 +10,98 @@
 	<link rel="stylesheet" href="/css/web.css"/>
 	<script src="/js/jquery.min.js"></script>
 	<script src="/js/bootstrap.min.js"></script>
+	<script src="/js/angular.min.js"></script>
 	<script src="/js/web.js"></script>
 	<link rel="shortcut icon" href="/favicon.ico" />
-	<title>Home | WebProxy</title>
+	<title>Status | WebProxy</title>
 </head>
 
-<body>
-<div class="head">
-	<h1><a href="/">Web Proxy</a></h1>
-</div>
+<body ng-app="web">
+
+<header>
+	<web-header></web-header>
+</header>
 
 
-<div class="body">
+<main class="container">
+<section ng-controller="ApiController as api">
 	<h3>System</h3>
-	<div>Name: {{system.name}}</div>
-	<div>Time: {{system.time}}</div>
-	<div>Uptime: {{system.uptime}}</div>
+	<table class="table table-striped table-bordered">
+		<tr>
+			<td>Name</td>
+			<td>{{api.system.name}}</td>
+		</tr>
+		<tr>
+			<td>Name</td>
+			<td>{{api.system.name}}</td>
+		</tr>
+		<tr>
+			<td>Name</td>
+			<td>{{api.system.name}}</td>
+		</tr>
+		<tr>
+			<td>Name</td>
+			<td>{{api.system.name}}</td>
+		</tr>
+		<tr>
+			<td>Name</td>
+			<td>{{api.system.name}}</td>
+		</tr>
+		<tr>
+			<td>Name</td>
+			<td>{{api.system.name}}</td>
+		</tr>
+		<tr>
+			<td>Name</td>
+			<td>{{api.system.name}}</td>
+		</tr>
+		<tr>
+			<td>Name</td>
+			<td>{{api.system.name}}</td>
+		</tr>
+		<tr>
+			<td>Name</td>
+			<td>{{api.system.name}}</td>
+		</tr>
+		<tr>
+			<td>Name</td>
+			<td>{{api.system.name}}</td>
+		</tr>
+		<tr>
+			<td>Name</td>
+			<td>{{api.system.name}}</td>
+		</tr>
+	</table>
+	<div>Name: {{api.system.name}}</div>
+	<div>Time: {{api.system.time}}</div>
+	<div>Uptime: {{api.system.uptime}}</div>
 	<div>
 		<h4>Memory</h4>
-		<div>Free: {{system.mem.free}}</div>
-		<div>Total: {{system.mem.total}}</div>
+		<div>Free: {{api.system.mem.free}}</div>
+		<div>Total: {{api.system.mem.total}}</div>
 	</div>
-	<div>Load: {{system.load}}</div>
+	<div>Load: {{api.system.load}}</div>
 	<div>
 		<h4>OS</h4>
-		<div>Type: {{system.os.type}}</div>
-		<div>Release: {{system.os.release}}</div>
-		<div>Platform: {{system.os.platform}}</div>
+		<div>Type: {{api.system.os.type}}</div>
+		<div>Release: {{api.system.os.release}}</div>
+		<div>Platform: {{api.system.os.platform}}</div>
 	</div>
 	<div>
 		<h4>CPU</h4>
-		<div>Type: {{system.cpu.type}}</div>
-		<div>Architecture: {{system.os.arch}}</div>
-		<div>Endian: {{system.os.endian}}</div>
+		<div>Type: {{api.system.cpu.type}}</div>
+		<div>Architecture: {{api.system.os.arch}}</div>
+		<div>Endian: {{api.system.os.endian}}</div>
 	</div>
-	<div>Network: {{system.network}}</div>
-</div>
+	<div>Network: {{api.system.network}}</div>
+</section>
+</main>
 
 
-<div class="foot">
-</div>
+<footer>
+	<web-footer></web-footer>
+</footer>
+
 </body>
 
 </html>

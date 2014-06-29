@@ -6,72 +6,18 @@ var os = require('os');
 var url = require('url');
 var express = require('express');
 
+var appLog = require('./modules/app-log.js');
+var appColl = require('./modules/app-coll.js');
+var appSend = require('./modules/app-config.js');
+var appConfig = require('./modules/app-config.js');
+
 var web = express();
+
 var app = {};
-
-
-
-// -------------
-// Configuration
-// -------------
-app.config = {
-	'usrAgent': 'Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0',
-	'port': process.env.PORT || 80
-};
-
-
-
-// -----------
-// App Support
-// -----------
-// send json data
-app.sendJson = function(res, data) {
-	res.writeHead(200, {'content-type': 'application/json'});
-	res.end(JSON.stringify(data));
-};
-
-// send html file
-app.sendHtml = function(res, file) {
-	fs.readFile(file, function(err, data) {
-		res.writeHead(200, {'content-type': 'text/html'});
-		res.end(data);
-	});
-};
-
-
-
-// ------------------
-// Collection Support
-// ------------------
-var coll = {
-	// add a new item to a max size collection
-	add: function(arr, item, max) {
-		if(arr.length > (max || 32)) arr.shift();
-		arr[arr.length] = item;
-	}
-};
-
-
-
-// -----------
-// Log Support
-// -----------
-var log = {
-	data: [],
-	maxLen: 32,
-
-	// clear logs
-	clear: function() {
-		this.data = [];
-	},
-
-	// add new log and send to console
-	add: function(msg) {
-		if(this.data.length > this.maxLen) this.data.shift();
-		this.data[this.data.length] = msg;
-		console.log(msg);
-	}
-};
+app = appLog(app);
+app = appColl(app);
+app = appSend(app);
+app = appConfig(app);
 
 
 
@@ -152,6 +98,10 @@ app.runtime = {
 		}
 	},
 	'proxy': {
+		'rate': {
+			'request': [],
+			'response': []
+		},
 		'active': {
 			'id': [],
 			'request': [],
@@ -267,10 +217,17 @@ app.updateProxy = function() {
 	aps.lastMin = aps.total;
 };
 
+// update runtime proxy info
+app.updateRuntimeProxy = function() {
+	coll.add(app.runtime.proxy.rate.request, app.proxy.request.rate);
+	coll.add(app.runtime.proxy.rate.response, app.proxy.response.rate);
+};
+
 // update runtime info
 app.updateRuntime = function() {
 	app.updateRuntimeSystem();
 	app.updateRuntimeProcess();
+	app.updateRuntimeProxy();
 };
 
 
@@ -280,7 +237,7 @@ app.updateRuntime = function() {
 // ---------
 
 // process server response
-function onServerResp(id, res, sRes) {
+app.onServerResp = function(id, res, sRes) {
 	// tweak content-length
 	var sHdr = sRes.headers;
 	sHdr['server'] = sHdr['content-length'];
@@ -303,9 +260,9 @@ function onServerResp(id, res, sRes) {
 
 
 // process proxy request
-web.all('/run/proxy', function(req, res) {
+web.all('/proxy', function(req, res) {
 	// prepare remote request options
-	log.add('Run[proxy] API accessed.');
+	log.add('Proxy accessed.');
 	var hReq = req.headers;
 	var reqUrl = hReq['user-agent'];
 	var hostName = url.parse(reqUrl).host;
@@ -320,7 +277,7 @@ web.all('/run/proxy', function(req, res) {
 	var id = app.addProxyRequest(req);
 	log.add('['+id+'] Request to Server: ' + reqUrl);
 	var sReq = http.request(options, function (sRes) {
-		onSrvrResponse(id, res, sRes);
+		app.onSrvrResponse(id, res, sRes);
 	});
 	sReq.on('error', function(err) {
 		log.add('['+id+'] Problem with request: ' + err.message);
@@ -342,75 +299,81 @@ web.all('/run/proxy', function(req, res) {
 // -------
 
 // get app config
-web.get('/config', function(req, res) {
+web.get('/api/config', function(req, res) {
 	log.add('Config API accessed.');
 	app.sendJson(res, app.config);
 });
 
 // read current log
-web.get('/log', function(req, res) {
+web.get('/api/log', function(req, res) {
 	log.add('Log API accessed.');
 	app.sendJson(res, log.data);
 });
 
 // get system info
-web.get('/system', function(req, res) {
+web.get('/api/system', function(req, res) {
 	app.updateSystem();
 	log.add('System API accessed.');
 	app.sendJson(res, app.system);
 });
 
 // get process info
-web.get('/process', function(req, res) {
+web.get('/api/process', function(req, res) {
 	app.updateProcess();
 	log.add('Process API accessed.');
 	app.sendJson(res, app.process);
 });
 
 // get proxy info
-web.get('/proxy', function(req, res) {
+web.get('/api/proxy', function(req, res) {
 	log.add('Proxy API accessed.');
 	app.sendJson(res, app.proxy);
 });
 
 // get runtime info
-web.get('/runtime', function(req, res) {
+web.get('/api/runtime', function(req, res) {
 	log.add('Runtime API accessed.');
 	app.sendJson(res, app.runtime);
 });
 
 // get runtime[system] info
-web.get('/runtime/system', function(req, res) {
+web.get('/api/runtime/system', function(req, res) {
 	log.add('Runtime[system] API accessed.');
 	app.sendJson(res, app.runtime.system);
 });
 
 // get runtime[process] info
-web.get('/runtime/process', function(req, res) {
+web.get('/api/runtime/process', function(req, res) {
 	log.add('Runtime[process] API accessed.');
 	app.sendJson(res, app.runtime.process);
 });
 
 // get runtime[proxy] info
-web.get('/runtime/proxy', function(req, res) {
+web.get('/api/runtime/proxy', function(req, res) {
 	log.add('Runtime[proxy] API accessed.');
 	app.sendJson(res, app.runtime.proxy)
 });
 
+// get runtime[proxy][rate] info
+web.get('/api/runtime/proxy/rate', function(req, res) {
+	log.add('Runtime[proxy][rate] API accessed.');
+	app.sendJson(res, app.runtime.proxy.rate);
+});
+
 // get runtime[proxy][active] info
-web.get('/runtime/proxy/active', function(req, res) {
+web.get('/api/runtime/proxy/active', function(req, res) {
 	log.add('Runtime[proxy][active] API accessed.');
 	app.sendJson(res, app.runtime.proxy.active);
 });
 
 // get runtime[proxy][failed] info
-web.get('/runtime/proxy/failed', function(req, res) {
+web.get('/api/runtime/proxy/failed', function(req, res) {
 	log.add('Runtime[proxy][failed] API accessed.');
 	app.sendJson(res, app.runtime.proxy.failed);
 });
 
 // get headers
-web.get('/headers', function(req, res) {
+web.get('/api/headers', function(req, res) {
 	log.add('Headers API accessed.');
 	app.sendJson(res, req.headers);
 });
@@ -428,7 +391,7 @@ web.get('/', function(req, res) {
 });
 
 // status web page
-web.get('/web/status', function(req, res) {
+web.get('/status', function(req, res) {
 	log.add('Status Web page accessed');
 	app.sendHtml(res, 'assets/html/status.html');
 })
@@ -448,9 +411,9 @@ web.use(function(req, res, next) {
 // Create HTTP Server
 // ------------------
 var server = web.listen(app.config.port, function() {
-	log.add('Proxy started on port ' + app.config.port);
+	log.add('Proxy started on port '+app.config.port+'.');
 	setInterval(function() {
 		app.updateRuntime();
 		app.updateProxy();
-	}, 60000);
+	}, 5*60*1000);
 });
