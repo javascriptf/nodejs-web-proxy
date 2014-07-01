@@ -31,85 +31,73 @@
  * ----------------------------------------------------------------------- */
 
 /* 
- * ------------------
- * Process Monitoring
- * ------------------
+ * ---------------
+ * Application API
+ * ---------------
  * 
- * File: app-process.js
+ * File: app-api.js
  * Project: Web Proxy
  * 
- * Monitors current process and provides information about it.
+ * Provides a API that can be used to access application data.
  * 
  */
-
-
-// required modules
-var mTank = require('./app-tank.js');
-
-// intialize modules
-var tank = mTank({});
 
 
 module.exports = function(inj) {
 
 
-	// process status
-	var status = {
-		'name': process.title,
-		'time': process.hrtime()[0],
-		'start': process.hrtime()[0],
-		'uptime': process.uptime(),
-		'id': process.pid,
-		'env': process.env,
-		'arg': process.argv,
-		'path': process.execPath,
-		'argv': process.execArgv,
-		'mem': {
-			'rss': 0,
-			'heap': {
-				'used': 0,
-				'total': 0
+	// get dependencies
+	var app = inj.sender;
+	var log = inj.log;
+
+	// max allowed request data
+	var maxData = 8192;
+
+
+	// get required data
+	var getData = function(req) {
+		var data = [];
+		for(var i=0; i<req.length; i++) {
+			if(req[i] === '*') data[i] = inj.data;
+			else if(req[i].search(/[^A-Za-z\.]/) >= 0) {
+				data[i] = {};
+			}
+			else {
+				try { data[i] = eval('inj.data.'+req[i]); }
+				catch(err) { data[i] = {}; }
 			}
 		}
+		return data;
 	};
 
 
-	// process history
-	var history = {
-		'time': [],
-		'mem': {
-			'rss': [],
-			'heap': {
-				'used': [],
-				'total': []
-			}
+	// handle data api request	
+	inj.code.onDataReq = function(req, res) {
+		var i = req.url.indexOf('?');
+		if(i >= 0) {
+			var query = req.url.slice(i+1);
+			query = query.split('&');
+			log.add('URL API query with '+query.length+' requests.');
+			app.sendJson(res, getData(query));
+			return;
 		}
-	};
-
-
-	// inject data
-	inj.data.status = status;
-	inj.data.history = history;
-
-
-	// update status
-	inj.code.updateStatus = function() {
-		var mem = process.memoryUsage();
-		status.time = process.hrtime()[0];
-		status.uptime = process.uptime();
-		status.mem.rss = mem.rss;
-		status.mem.heap.used = mem.heapUsed;
-		status.mem.heap.total = mem.heapTotal;
-	};
-
-
-	// update history
-	inj.code.updateHistory = function() {
-		var mem = process.memoryUsage();
-		tank.add(history.time, process.hrtime()[0]);
-		tank.add(history.mem.rss, mem.rss);
-		tank.add(history.mem.heap.used, mem.heapUsed);
-		tank.add(history.mem.heap.total, mem.heapTotal);
+		var data = '';
+		req.on('data', function(chunk) {
+			if(data.length < maxData)
+			data += chunk;
+		});
+		req.on('end', function() {
+			try {
+				var query = JSON.parse(data);
+				log.add('JSON API query with '+query.length+' requests.');
+				app.sendJson(res, getData(query));
+			}
+			catch(err) {
+				res.statusCode = 400;
+				res.end('Error with request data.');
+				log.add('Invalid JSON API query.');
+			}
+		});
 	};
 
 

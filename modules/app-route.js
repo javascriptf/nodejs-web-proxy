@@ -31,86 +31,54 @@
  * ----------------------------------------------------------------------- */
 
 /* 
- * ------------------
- * Process Monitoring
- * ------------------
+ * -----------
+ * Web Routing
+ * -----------
  * 
- * File: app-process.js
+ * File: app-route.js
  * Project: Web Proxy
  * 
- * Monitors current process and provides information about it.
+ * Routes a request path to appropriate handler.
  * 
  */
 
 
-// required modules
-var mTank = require('./app-tank.js');
-
-// intialize modules
-var tank = mTank({});
-
-
 module.exports = function(inj) {
+	
+
+	// fetch dependencies
+	var log = inj.log;
+	var web = inj.router;
+	var app = inj.code;
+	var api = app.api;
 
 
-	// process status
-	var status = {
-		'name': process.title,
-		'time': process.hrtime()[0],
-		'start': process.hrtime()[0],
-		'uptime': process.uptime(),
-		'id': process.pid,
-		'env': process.env,
-		'arg': process.argv,
-		'path': process.execPath,
-		'argv': process.execArgv,
-		'mem': {
-			'rss': 0,
-			'heap': {
-				'used': 0,
-				'total': 0
-			}
-		}
-	};
+	// root web page
+	web.get('/', function(req, res) {
+		log.add('Root Web Page accessed.');
+		app.sendHtml(res, 'assets/html/index.html');
+	});
 
 
-	// process history
-	var history = {
-		'time': [],
-		'mem': {
-			'rss': [],
-			'heap': {
-				'used': [],
-				'total': []
-			}
-		}
-	};
+	// status web page
+	web.get('/status', function(req, res) {
+		log.add('Status Web page accessed.');
+		app.sendHtml(res, 'assets/html/status.html');
+	});
 
 
-	// inject data
-	inj.data.status = status;
-	inj.data.history = history;
+	// data api access
+	web.get('/api/data', function(req, res) {
+		log.add('Data API accessed.');
+		api.onDataReq(req, res);
+	});
 
-
-	// update status
-	inj.code.updateStatus = function() {
-		var mem = process.memoryUsage();
-		status.time = process.hrtime()[0];
-		status.uptime = process.uptime();
-		status.mem.rss = mem.rss;
-		status.mem.heap.used = mem.heapUsed;
-		status.mem.heap.total = mem.heapTotal;
-	};
-
-
-	// update history
-	inj.code.updateHistory = function() {
-		var mem = process.memoryUsage();
-		tank.add(history.time, process.hrtime()[0]);
-		tank.add(history.mem.rss, mem.rss);
-		tank.add(history.mem.heap.used, mem.heapUsed);
-		tank.add(history.mem.heap.total, mem.heapTotal);
-	};
+	
+	// proxy access
+	web.all('/proxy', function(req, res) {
+		log.add('Proxy accessed.');
+		app.proxy.handleReq(req, res);
+	});
 
 
 	return inj;

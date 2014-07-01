@@ -1,179 +1,232 @@
-// -------------
-// Proxy Support
-// -------------
+/* ----------------------------------------------------------------------- *
+ *
+ *	 Copyright (c) 2014, Subhajit Sahu
+ *	 All rights reserved.
+ *
+ *   Redistribution and use in source and binary forms, with or without
+ *   modification, are permitted provided that the following
+ *   conditions are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *
+ *     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ *     CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ *     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ *     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ *     CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ *     NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ *     HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ *     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ *     OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * ----------------------------------------------------------------------- */
+
+/* 
+ * ------------
+ * Proxy Module
+ * ------------
+ * 
+ * File: app-proxy.js
+ * Project: Web Proxy
+ * 
+ * Provides an HTTP Proxy (without routing) along with its monitoring.
+ * 
+ */
+
 
 // required modules
 var url = require('url');
+var http = require('http');
+var mTank = require('./app-tank.js');
+var mConfig = require('./app-config.js');
 
-var appLog = require('./app-log.js');
-var appColl = require('./app-coll.js');
-var appConfig = require('./app-config.js');
-
-var log = appLog({});
-var coll = appColl({});
-var config = appConfig({});
+// initialize modules
+var tank = mTank({});
 
 
 module.exports = function(inj) {
 
-	// initialize proxy info
-	inj.status = {
+
+	// proxy status
+	var status = {
 		'request': {
 			'total': 0,
-			'failed': 0,
-			'pending': 0
+			'pending': 0,
+			'failed': 0
 		},
 		'response': {
 			'total': 0
 		}
 	};
 
-	// initialize runtime proxy info
-	inj.runtime = {
+
+	// proxy history
+	var history = {
 		'request': {
 			'total': [],
-			'failed': [],
-			'pending': []
+			'pending': [],
+			'failed': []
 		},
 		'response': {
 			'total': []
 		}
 	};
 
-	// initialize proxy log
-	inj.log = {
-		'active': {
-			'id': [],
-			'request': [],
-			'response': []
-		},
-		'failed': {
-			'id': [],
-			'request': [],
-			'response': []
-		}
+
+	// proxy running record
+	var record = {
+		'active': [],
+		'failed': []
 	};
 
 
-	// add proxy request info
-	inj.func.logBeginRequest = function(req) {
-		++inj.status.request.pending;
-		var id = ++inj.status.request.total;
-		var reqUrl = req.headers['user-agent'];
-		var pxya = inj.log.active;
-		if(pxya.id.length >= 32 && (pxya.response[0] === undefined || pxya.response[0].complete === false)) {
-			var pxyf = inj.log.failed;
-			coll.add(pxyf.id, pxya.id[0]);
-			coll.add(pxyf.request, pxya.request[0]);
-			coll.add(pxyf.response, pxya.response[0])
+	// inject data
+	inj.data.status = status;
+	inj.data.history = history;
+	inj.data.record = record;
+	var config = inj.config;
+	var log = inj.log;
+
+
+	// record begining of a proxy request
+	inj.code.recBeginRequest = function(req) {
+		++status.request.pending;
+		var id = ++status.request.total;
+		var addr = req.headers['user-agent'];
+		if(record.active.length >= 32 &&
+			record.active[0].response.complete === false) {
+			--status.request.pending; ++status.request.failed;
+			tank.add(record.failed, record.active[0]);
 		}
-		coll.add(pxya.id, id);
-		coll.add(pxya.request, {
-			'time': process.hrtime()[0],
-			'path': reqUrl,
-			'host': url.parse(reqUrl).host,
-			'method': req.method,
-			'headers': req.headers,
-			'version': req.httpVersion,
-			'trailers': req.trailers,
-			'complete': false
+		tank.add(record.active, {
+			'id': id,
+			'request': {
+				'time': process.hrtime()[0],
+				'path': addr,
+				'host': url.parse(addr).host,
+				'method': req.method,
+				'headers': req.headers,
+				'version': req.httpVersion,
+				'trailers': req.trailers,
+				'complete': false
+			},
+			'response': {
+				'complete': false
+			}
 		});
 		return id;
 	};
 
-	// complete proxy request
-	inj.func.logEndRequest = function(id) {
-		var pxy = inj.log.active;
-		var i = pxy.id.indexOf(id);
-		if(i >= 0) pxy.request[i].complete = true;
+
+	// record ending of a proxy request
+	inj.code.recEndRequest = function(id) {
+		for(var i=0; i<record.active.length; i++) {
+			if(record.active[i].id !== id) continue;
+			record.active[i].request.complete = true;
+			break;
+		}
 	};
 
-	// add proxy response info
-	inj.func.logBeginResponse = function(id, res) {
-		--inj.status.request.pending;
-		++inj.status.response.total;
-		var pxy = inj.log.active;
-		var i = pxy.id.indexOf(id);
-		if(i >= 0) pxy.response[i] = {
-			'time': process.hrtime()[0],
-			'status': res.statusCode,
-			'headers': res.headers,
-			'version': res.httpVersion,
-			'trailers': res.trailers,
-			'complete': false
-		};
+
+	// record begining of a proxy response
+	inj.code.recBeginResponse = function(id, res) {
+		--status.request.pending;
+		++status.response.total;
+		for(var i=0; i<record.active.length; i++) {
+			if(record.active[i].id !== id) continue;
+			record.active[i].response = {
+				'time': process.hrtime()[0],
+				'status': res.statusCode,
+				'headers': res.headers,
+				'version': res.httpVersion,
+				'trailers': res.trailers,
+				'complete': false
+			};
+		}
 	};
 
-	// complete proxy response
-	inj.func.logEndResponse = function(id) {
-		var pxy = inj.log.active;
-		var i = pxy.id.indexOf(id);
-		if(i >= 0) pxy.response[i].complete = true;
+
+	// record ending of a proxy response
+	inj.code.recEndResponse = function(id) {
+		for(var i=0; i<record.active.length; i++) {
+			if(record.active[i].id !== id) continue;
+			record.active[id].request.complete = true;
+		}
 	};
 
-	// update runtime proxy info
-	inj.func.updateRuntime = function() {
-		coll.add(inj.runtime.request.total, inj.status.request.total);
-		coll.add(inj.runtime.request.failed, inj.status.request.failed);
-		coll.add(inj.runtime.request.pending, inj.status.request.pending);
-		coll.add(inj.runtime.response.total, inj.status.response.total);
+
+	// update proxy history
+	inj.code.updateHistory = function() {
+		tank.add(history.request.total, status.request.total);
+		tank.add(history.request.failed, status.request.failed);
+		tank.add(history.request.pending, status.request.pending);
+		tank.add(history.response.total, status.response.total);
 	};
 
-	// process server response
-	inj.func.onServerRes = function(id, res, sRes) {
+
+	// handle response from server
+	inj.code.handleRes = function(id, res, sRes) {
 		// tweak content-length
 		var sHdr = sRes.headers;
 		sHdr['server'] = sHdr['content-length'];
 		sHdr['transfer-encoding'] = 'chunked';
 		sHdr['content-length'] 	= 0;
-		inj.func.logBeginResponse(id, res);
-		log.add('['+id+'] Server Response started.');
+		inj.code.recBeginResponse(id, res);
+		log.add('['+id+'] Server Proxy Response started.');
 		res.writeHead(sRes.statusCode, sHdr);
 		sRes.on('data', function (chunk) {
 			res.write(chunk);
 		});
 		sRes.on('end', function() {
-			if(sRes.trailers != null)
-				res.addTrailers(sRes.trailers);
+			if(sRes.trailers != null) res.addTrailers(sRes.trailers);
 			res.end();
-			log.add('['+id+'] Server Response complete.');
-			inj.func.logEndResponse(id);
+			inj.code.recEndResponse(id);
+			log.add('['+id+'] Server Proxy Response complete.');
 		});
-	}
+	};
 
 
-	// process proxy request
-	in.func.onProxyReq = function(req, res) {
+	// handle request from user
+	inj.code.handleReq = function(req, res) {
 		// prepare remote request options
-		log.add('Proxy accessed.');
 		var hReq = req.headers;
-		var reqUrl = hReq['user-agent'];
-		var hostName = url.parse(reqUrl).host;
-		hReq['host'] = hostName;
+		var addr = hReq['user-agent'];
+		var hostName = url.parse(addr).host;
 		hReq['user-agent'] = config.usrAgent;
 		var options = {
 			'method': req.method,
 			'host': hostName,
-			'path': reqUrl,
+			'path': addr,
 			'headers': hReq
 		};
-		var id = inj.func.logBeginRequest(req);
-		log.add('['+id+'] Request to Server: ' + reqUrl);
+		var id = inj.code.recBeginRequest(req);
+		log.add('['+id+'] Proxy Request to Server: '+addr+'.');
 		var sReq = http.request(options, function (sRes) {
-			inj.func.onServerRes(id, res, sRes);
+			inj.code.handleRes(id, res, sRes);
 		});
 		sReq.on('error', function(err) {
-			log.add('['+id+'] Problem with request: ' + err.message);
+			log.add('['+id+'] Problem with proxy request: '+err.message+'.');
 		});
-		var reqData = req.read();
-		if(reqData != null)
-			sReq.write(reqData);
-		if(req.trailers != null)
-			sReq.addTrailers(req.trailers);
-		sReq.end();
-		inj.func.logEndRequest(id);
-		log.add('['+id+'] Server Request complete');
-	});
+		req.on('data', function(chunk) {
+			sReq.write(chunk);
+		});
+		req.on('end', function() {
+			if(req.trailers !== null) sReq.addTrailers(req.trailers);
+			sReq.end();
+			inj.code.recEndRequest(id);
+			log.add('['+id+'] Server Proxy Request complete.');
+		});
+	};
+
 
 	return inj;
 };

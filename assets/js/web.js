@@ -30,8 +30,8 @@ web.controller('ApiController', ['$http', function($http) {
 	api.system = [];
 	
 	setInterval(function() {
-		$http.get('/api/system').success(function (data) {
-			api.system = data;
+		$http.get('/api/data?system.status').success(function(data) {
+			api.system = data[0];
 		});
 	}, 3000);
 }]);

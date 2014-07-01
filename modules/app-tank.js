@@ -31,86 +31,41 @@
  * ----------------------------------------------------------------------- */
 
 /* 
- * ------------------
- * Process Monitoring
- * ------------------
+ * -----------
+ * Tank Module
+ * -----------
  * 
- * File: app-process.js
+ * File: app-tank.js
  * Project: Web Proxy
  * 
- * Monitors current process and provides information about it.
+ * Tank is a data structure where data flows in from one end, and flows out
+ * from another end. However, due to its limited size excess infolw of data
+ * would cause data near the other end to flow out.
  * 
+ * Usage:
+ * // get the module object
+ * var mTank = require('./tank.js')
+ * // inject tank module into obj
+ * mTank(obj);
+ * // start using the module
+ * obj.add(...);
  */
-
-
-// required modules
-var mTank = require('./app-tank.js');
-
-// intialize modules
-var tank = mTank({});
 
 
 module.exports = function(inj) {
 
 
-	// process status
-	var status = {
-		'name': process.title,
-		'time': process.hrtime()[0],
-		'start': process.hrtime()[0],
-		'uptime': process.uptime(),
-		'id': process.pid,
-		'env': process.env,
-		'arg': process.argv,
-		'path': process.execPath,
-		'argv': process.execArgv,
-		'mem': {
-			'rss': 0,
-			'heap': {
-				'used': 0,
-				'total': 0
-			}
-		}
+	// add an item (to the inflow end)
+	inj.add = function(arr, item, max) {
+		if(arr.length > (max || 32)) arr.shift();
+		arr[arr.length] = item;
 	};
 
 
-	// process history
-	var history = {
-		'time': [],
-		'mem': {
-			'rss': [],
-			'heap': {
-				'used': [],
-				'total': []
-			}
-		}
-	};
-
-
-	// inject data
-	inj.data.status = status;
-	inj.data.history = history;
-
-
-	// update status
-	inj.code.updateStatus = function() {
-		var mem = process.memoryUsage();
-		status.time = process.hrtime()[0];
-		status.uptime = process.uptime();
-		status.mem.rss = mem.rss;
-		status.mem.heap.used = mem.heapUsed;
-		status.mem.heap.total = mem.heapTotal;
-	};
-
-
-	// update history
-	inj.code.updateHistory = function() {
-		var mem = process.memoryUsage();
-		tank.add(history.time, process.hrtime()[0]);
-		tank.add(history.mem.rss, mem.rss);
-		tank.add(history.mem.heap.used, mem.heapUsed);
-		tank.add(history.mem.heap.total, mem.heapTotal);
-	};
+	// remove an item (from the outflow end)
+	inj.remove = function(arr) {
+		if(arr.length > 0) arr.shift();
+	}
 
 
 	return inj;

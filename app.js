@@ -1,173 +1,132 @@
-// ----------------
-// Required Modules
-// ----------------
-var fs = require('fs');
-var os = require('os');
-var url = require('url');
+/* ----------------------------------------------------------------------- *
+ *
+ *	 Copyright (c) 2014, Subhajit Sahu
+ *	 All rights reserved.
+ *
+ *   Redistribution and use in source and binary forms, with or without
+ *   modification, are permitted provided that the following
+ *   conditions are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *
+ *     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ *     CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ *     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ *     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ *     CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ *     NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ *     HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ *     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ *     OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * ----------------------------------------------------------------------- */
+
+/* 
+ * ----------------
+ * Main Application
+ * ----------------
+ * 
+ * File: app.js
+ * Project: Web Proxy
+ * 
+ * This is the main application file.
+ * 
+ */
+
+
+// required modules
 var express = require('express');
 
+var mLog = require('./modules/app-log.js');
+var mApi = require('./modules/app-api.js');
+var mSend = require('./modules/app-send.js');
+var mProxy = require('./modules/app-proxy.js');
+var mRoute = require('./modules/app-route.js');
+var mConfig = require('./modules/app-config.js');
+var mSystem = require('./modules/app-system.js');
+var mProcess = require('./modules/app-process.js');
 
-var appLog = require('./modules/app-log.js');
-var appColl = require('./modules/app-coll.js');
-var appSend = require('./modules/app-config.js');
-var appConfig = require('./modules/app-config.js');
 
+// inlitialize modules
 var web = express();
+var log = mLog({});
+var config = mConfig({});
 
-var app = {};
-appLog(app);
-appColl(app);
-appSend(app);
-appConfig(app);
-
-
-
-// --------
-// App Info
-// --------
-
-
-
-// update runtime info
-app.updateRuntime = function() {
-	app.updateRuntimeSystem();
-	app.updateRuntimeProcess();
-	app.updateRuntimeProxy();
+var app = {
+	'data': {
+		'log': log,
+		'config': config,
+		'process': {},
+		'system': {},
+		'proxy': {}
+	},
+	'process': {},
+	'system': {},
+	'proxy': {},
+	'api': {}
 };
 
-
-
-// ---------
-// Proxy API
-// ---------
-
-// process proxy request
-web.all('/proxy', function(req, res) {
-
+mSend(app);
+mProxy({
+	'data': app.data.proxy,
+	'code': app.proxy,
+	'config': config,
+	'log': log
+});
+mSystem({
+	'data': app.data.system,
+	'code': app.system
+});
+mProcess({
+	'data': app.data.process,
+	'code': app.process
+});
+mApi({
+	'log': log,
+	'data': app.data,
+	'code': app.api,
+	'sender': app
+});
+mRoute({
+	'log': log,
+	'code': app,
+	'router': web
 });
 
 
-
-// -------
-// Web API
-// -------
-
-// get app config
-web.get('/api/config', function(req, res) {
-	log.add('Config API accessed.');
-	app.sendJson(res, app.config);
-});
-
-// read current log
-web.get('/api/log', function(req, res) {
-	log.add('Log API accessed.');
-	app.sendJson(res, log.data);
-});
-
-// get system info
-web.get('/api/system', function(req, res) {
-	app.updateSystem();
-	log.add('System API accessed.');
-	app.sendJson(res, app.system);
-});
-
-// get process info
-web.get('/api/process', function(req, res) {
-	app.updateProcess();
-	log.add('Process API accessed.');
-	app.sendJson(res, app.process);
-});
-
-// get proxy info
-web.get('/api/proxy', function(req, res) {
-	log.add('Proxy API accessed.');
-	app.sendJson(res, app.proxy);
-});
-
-// get runtime info
-web.get('/api/runtime', function(req, res) {
-	log.add('Runtime API accessed.');
-	app.sendJson(res, app.runtime);
-});
-
-// get runtime[system] info
-web.get('/api/runtime/system', function(req, res) {
-	log.add('Runtime[system] API accessed.');
-	app.sendJson(res, app.runtime.system);
-});
-
-// get runtime[process] info
-web.get('/api/runtime/process', function(req, res) {
-	log.add('Runtime[process] API accessed.');
-	app.sendJson(res, app.runtime.process);
-});
-
-// get runtime[proxy] info
-web.get('/api/runtime/proxy', function(req, res) {
-	log.add('Runtime[proxy] API accessed.');
-	app.sendJson(res, app.runtime.proxy)
-});
-
-// get runtime[proxy][rate] info
-web.get('/api/runtime/proxy/rate', function(req, res) {
-	log.add('Runtime[proxy][rate] API accessed.');
-	app.sendJson(res, app.runtime.proxy.rate);
-});
-
-// get runtime[proxy][active] info
-web.get('/api/runtime/proxy/active', function(req, res) {
-	log.add('Runtime[proxy][active] API accessed.');
-	app.sendJson(res, app.runtime.proxy.active);
-});
-
-// get runtime[proxy][failed] info
-web.get('/api/runtime/proxy/failed', function(req, res) {
-	log.add('Runtime[proxy][failed] API accessed.');
-	app.sendJson(res, app.runtime.proxy.failed);
-});
-
-// get headers
-web.get('/api/headers', function(req, res) {
-	log.add('Headers API accessed.');
-	app.sendJson(res, req.headers);
-});
-
-
-
-// ---------------
-// Web Page Access
-// ---------------
-
-// root web page
-web.get('/', function(req, res) {
-	log.add('Root Web Page accessed.');
-	app.sendHtml(res, 'assets/html/index.html');
-});
-
-// status web page
-web.get('/status', function(req, res) {
-	log.add('Status Web page accessed');
-	app.sendHtml(res, 'assets/html/status.html');
-})
-
-// static files
+// Static files
 web.use(express.static(__dirname + '/assets'));
 
-// wrong path
+
+// Wrong path
 web.use(function(req, res, next) {
 	log.add('Wrong Path['+req.url+'] accessed.');
 	app.sendHtml(res, 'assets/html/404.html');
 });
 
 
-
-// ------------------
 // Create HTTP Server
-// ------------------
-var server = web.listen(app.config.port, function() {
-	log.add('Proxy started on port '+app.config.port+'.');
+var server = web.listen(config.port, function() {
+	// log the start of server
+	log.add('Proxy started on port '+config.port+'.');
+	//  update status every 5s
 	setInterval(function() {
-		app.updateRuntime();
-		app.updateProxy();
-	}, 5*60*1000);
+		app.process.updateStatus();
+		app.system.updateStatus();
+	}, 5*1000);
+	// update history every minute
+	setInterval(function() {
+		app.process.updateHistory();
+		app.system.updateHistory();
+		app.proxy.updateHistory();
+	}, 60*1000);
 });
