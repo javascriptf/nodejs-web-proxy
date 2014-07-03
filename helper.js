@@ -108,12 +108,7 @@ app.handleRes = function(id, res, sRes) {
 	var sHdr = sRes.headers;
 	sHdr['content-length'] = sHdr['server'];
 	sHdr['server'] = config.remote.server;
-	if(sHdr['connection'] !== undefined)
-		sHdr['proxy-connection'] = sHdr['connection'];
-	if(sHdr['authorization'] !== undefined)
-		sHdr['proxy-authorization'] = sHdr['authorization'];
-	if(sHdr['www-authenticate'] !== undefined)
-		sHdr['proxy-authenticate'] = sHdr['www-authenticate'];
+	sHdr['proxy-connection'] = sHdr['connection'];
 	res.writeHead(sRes.statusCode, sHdr);
 	sRes.on('data', function(chunk) {
 		res.write(chunk);
@@ -141,12 +136,7 @@ app.handleReq = function(req, res) {
 	var hdr = req.headers;
 	hdr['host'] = config.remote.host;
 	hdr['user-agent'] = req.url;
-	if(hdr['proxy-connection'] !== undefined)
-		hdr['connection'] = hdr['proxy-connection'];
-	if(hdr['proxy-authorization'] !== undefined)
-		hdr['authorization'] = hdr['proxy-authorization'];
-	if(hdr['proxy-authenticate'] !== undefined)
-		hdr['www-authenticate'] = hdr['proxy-authenticate'];
+	hdr['connection'] = hdr['proxy-connection'];
 	var options = {
 		'method': req.method,
 		'host': config.remote.host,

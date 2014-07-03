@@ -50,10 +50,10 @@ module.exports = function(inj) {
 	inj.copy = function(arr) {
 		var mrg = '';
 		for(var i=0; i<arr.length; i++) {
-			var str = JSON.stringify();
-			mrg += str.slice(1, str.length-1);
+			var str = JSON.stringify(arr[i]);
+			mrg += ((i > 0)? ',' : '') + str.slice(1, str.length-1);
 		}
-		return JSON.parse(mrg);
+		return JSON.parse('{'+mrg+'}');
 	}
 
 

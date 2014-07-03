@@ -115,7 +115,7 @@ module.exports = function(inj) {
 				'time': process.hrtime()[0],
 				'addr': addr,
 				'method': req.method,
-				'headers': obj.copy(req.headers),
+				'headers': obj.copy([req.headers]),
 				'version': req.httpVersion,
 				'trailers': req.trailers,
 				'complete': false
@@ -147,7 +147,7 @@ module.exports = function(inj) {
 			record.active[i].response = {
 				'time': process.hrtime()[0],
 				'status': res.statusCode,
-				'headers': obj.copy(res.headers),
+				'headers': obj.copy([res.headers]),
 				'version': res.httpVersion,
 				'trailers': res.trailers,
 				'complete': false
@@ -181,6 +181,7 @@ module.exports = function(inj) {
 		var sHdr = sRes.headers;
 		sHdr['server'] = sHdr['content-length'];
 		sHdr['transfer-encoding'] = 'chunked';
+		sHdr['connection'] = 'keep-alive';
 		sHdr['content-length'] = 0;
 		log.add('['+id+'] Server Proxy Response started.');
 		res.writeHead(sRes.statusCode, sHdr);
@@ -203,12 +204,14 @@ module.exports = function(inj) {
 		var addr = hReq['user-agent'];
 		var host = url.parse(addr).host;
 		hReq['user-agent'] = config.usrAgent;
+		hReq['host'] = host;
 		var options = {
 			'method': req.method,
 			'host': host,
 			'path': addr,
 			'headers': hReq
 		};
+		log.add('['+id+'] Request is: '+JSON.stringify(options));
 		log.add('['+id+'] Proxy Request to Server: '+addr+'.');
 		var sReq = http.request(options, function (sRes) {
 			inj.code.handleRes(id, res, sRes);
