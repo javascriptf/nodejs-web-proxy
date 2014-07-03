@@ -31,40 +31,29 @@
  * ----------------------------------------------------------------------- */
 
 /* 
- * -----------
- * Tank Module
- * -----------
+ * -------------
+ * Object Module
+ * -------------
  * 
- * File: app-tank.js
+ * File: app-obj.js
  * Project: Web Proxy
  * 
- * Tank is a data structure where data flows in from one end, and flows out
- * from another end. However, due to its limited size excess inflow of data
- * would cause data near the other end to flow out.
+ * Provides convenient functions for operating with objects.
  * 
- * Usage:
- * // get the module object
- * var mTank = require('./tank.js')
- * // inject tank module into obj
- * mTank(obj);
- * // start using the module
- * obj.add(...);
  */
 
 
 module.exports = function(inj) {
 
 
-	// add an item (to the inflow end)
-	inj.add = function(arr, item, max) {
-		if(arr.length > (max || 32)) arr.shift();
-		arr[arr.length] = item;
-	};
-
-
-	// remove an item (from the outflow end)
-	inj.remove = function(arr) {
-		if(arr.length > 0) arr.shift();
+	// get a deep copied, merged JSON object
+	inj.copy = function(arr) {
+		var mrg = '';
+		for(var i=0; i<arr.length; i++) {
+			var str = JSON.stringify();
+			mrg += str.slice(1, str.length-1);
+		}
+		return JSON.parse(mrg);
 	}
 
 

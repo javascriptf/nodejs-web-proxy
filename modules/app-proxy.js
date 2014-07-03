@@ -46,11 +46,14 @@
 // required modules
 var url = require('url');
 var http = require('http');
+var mObj = require('./app-obj.js');
 var mTank = require('./app-tank.js');
 var mConfig = require('./app-config.js');
 
 // initialize modules
+var obj = mObj({});
 var tank = mTank({});
+var config = mConfig({});
 
 
 module.exports = function(inj) {
@@ -93,7 +96,6 @@ module.exports = function(inj) {
 	inj.data.status = status;
 	inj.data.history = history;
 	inj.data.record = record;
-	var config = inj.config;
 	var log = inj.log;
 
 
@@ -111,10 +113,9 @@ module.exports = function(inj) {
 			'id': id,
 			'request': {
 				'time': process.hrtime()[0],
-				'path': addr,
-				'host': url.parse(addr).host,
+				'addr': addr,
 				'method': req.method,
-				'headers': req.headers,
+				'headers': obj.copy(req.headers),
 				'version': req.httpVersion,
 				'trailers': req.trailers,
 				'complete': false
@@ -146,7 +147,7 @@ module.exports = function(inj) {
 			record.active[i].response = {
 				'time': process.hrtime()[0],
 				'status': res.statusCode,
-				'headers': res.headers,
+				'headers': obj.copy(res.headers),
 				'version': res.httpVersion,
 				'trailers': res.trailers,
 				'complete': false
@@ -159,7 +160,7 @@ module.exports = function(inj) {
 	inj.code.recEndResponse = function(id) {
 		for(var i=0; i<record.active.length; i++) {
 			if(record.active[i].id !== id) continue;
-			record.active[id].request.complete = true;
+			record.active[i].response.complete = true;
 		}
 	};
 
@@ -176,11 +177,11 @@ module.exports = function(inj) {
 	// handle response from server
 	inj.code.handleRes = function(id, res, sRes) {
 		// tweak content-length
+		inj.code.recBeginResponse(id, sRes);
 		var sHdr = sRes.headers;
 		sHdr['server'] = sHdr['content-length'];
 		sHdr['transfer-encoding'] = 'chunked';
-		sHdr['content-length'] 	= 0;
-		inj.code.recBeginResponse(id, res);
+		sHdr['content-length'] = 0;
 		log.add('['+id+'] Server Proxy Response started.');
 		res.writeHead(sRes.statusCode, sHdr);
 		sRes.on('data', function (chunk) {
@@ -188,8 +189,7 @@ module.exports = function(inj) {
 		});
 		sRes.on('end', function() {
 			if(sRes.trailers != null) res.addTrailers(sRes.trailers);
-			res.end();
-			inj.code.recEndResponse(id);
+			res.end(); inj.code.recEndResponse(id);
 			log.add('['+id+'] Server Proxy Response complete.');
 		});
 	};
@@ -198,17 +198,17 @@ module.exports = function(inj) {
 	// handle request from user
 	inj.code.handleReq = function(req, res) {
 		// prepare remote request options
+		var id = inj.code.recBeginRequest(req);
 		var hReq = req.headers;
 		var addr = hReq['user-agent'];
-		var hostName = url.parse(addr).host;
+		var host = url.parse(addr).host;
 		hReq['user-agent'] = config.usrAgent;
 		var options = {
 			'method': req.method,
-			'host': hostName,
+			'host': host,
 			'path': addr,
 			'headers': hReq
 		};
-		var id = inj.code.recBeginRequest(req);
 		log.add('['+id+'] Proxy Request to Server: '+addr+'.');
 		var sReq = http.request(options, function (sRes) {
 			inj.code.handleRes(id, res, sRes);
@@ -221,8 +221,7 @@ module.exports = function(inj) {
 		});
 		req.on('end', function() {
 			if(req.trailers !== null) sReq.addTrailers(req.trailers);
-			sReq.end();
-			inj.code.recEndRequest(id);
+			sReq.end(); inj.code.recEndRequest(id);
 			log.add('['+id+'] Server Proxy Request complete.');
 		});
 	};

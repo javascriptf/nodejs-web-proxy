@@ -61,6 +61,7 @@ var web = express();
 var log = mLog({});
 var config = mConfig({});
 
+
 var app = {
 	'data': {
 		'log': log,
@@ -79,7 +80,6 @@ mSend(app);
 mProxy({
 	'data': app.data.proxy,
 	'code': app.proxy,
-	'config': config,
 	'log': log
 });
 mSystem({

@@ -61,8 +61,8 @@ module.exports = function(inj) {
 		'time': process.hrtime()[0],
 		'uptime': os.uptime(),
 		'mem': {
-			'total': os.totalmem(),
 			'free': os.freemem(),
+			'total': os.totalmem()
 		},
 		'load': os.loadavg()[0],
 		'os': {

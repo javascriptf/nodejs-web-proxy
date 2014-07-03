@@ -1,0 +1,11 @@
+{
+	"local": {
+		"port": 8080
+	},
+	"remote": {
+		"port": 80,
+		"path": "/proxy",
+		"host": "webproxy-20320.onmodulus.net",
+		"server": "Server: Apache/2.4.1 (Unix)"
+	}
+}
