@@ -2965,7 +2965,7 @@ div.icon-bar {
   width: 100%;
   font-size: 0;
   display: inline-block;
-  background: #333333; }
+  background: #303030; }
   div.icon-bar > * {
     text-align: center;
     font-size: 1rem;
@@ -2983,8 +2983,8 @@ div.icon-bar {
       font-size: 1.875rem;
       vertical-align: middle; }
     div.icon-bar > * img {
-      width: 1.875rem;
-      height: 1.875rem; }
+      width: 2.875rem;
+      height: 2.875rem; }
   div.icon-bar.label-right > * i, div.icon-bar.label-right > * img {
     margin: 0 .0625rem 0 0;
     display: inline-block; }
@@ -3009,10 +3009,10 @@ div.icon-bar {
     div.icon-bar > * i {
       font-size: 1.875rem; }
     div.icon-bar > * img {
-      width: 1.875rem;
-      height: 1.875rem; }
+      width: 2.875rem;
+      height: 2.875rem; }
   div.icon-bar > *:hover {
-    background: #008cba; }
+    background: #444444; }
   div.icon-bar > * label {
     color: white; }
   div.icon-bar > * i {
@@ -5781,6 +5781,9 @@ footer .row {
   padding-bottom: 1em;
   border-bottom: 1px solid #AADDAA; }
 
+header .side-nav li {
+  float: left; }
+
 footer .side-nav li {
   float: right; }
 
@@ -5809,3 +5812,6 @@ section.important {
 .important p {
   font-family: "Open Sans", "Trebuchet MS", sans-serif;
   font-size: 1.2em; }
+
+.icon-bar .active {
+  background-color: #6666AA; }

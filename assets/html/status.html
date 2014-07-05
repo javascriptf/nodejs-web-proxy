@@ -17,66 +17,13 @@
 <body ng-app="web">
 
 <header>
-	<web-header ng-init="menu.set(2)"></web-header>
+	<web-header ng-init="webHdr.select(2)"></web-header>
 	<status-header></status-header>
 </header>
 
 
 <main>
-<section>
-	<table>
-	<tr>
-		<td>Name</td>
-		<td><i class="fa fa-camera-retro fa-lg fa-5x"></i></td>
-	</tr>
-	<tr>
-		<td>Time</td>
-		<td></td>
-	</tr>
-	<tr>
-		<td>Uptime</td>
-		<td></td>
-	</tr>
-	<tr>
-		<td>Load</td>
-		<td></td>
-	</tr>
-	<tr>
-		<td>Memory</td>
-		<td>
-		<table>
-		<tr>
-			<td>Free</td>
-			<td></td>
-		</tr>
-		<tr>
-			<td>Total</td>
-			<td></td>
-		</tr>
-		</table>
-		</td>
-	</tr>
-	<tr>
-		<td>OS</td>
-		<td>
-		<table>
-		<tr>
-			<td>Type</td>
-			<td></td>
-		</tr>
-		<tr>
-			<td>Release</td>
-			<td></td>
-		</tr>
-		<tr>
-			<td>Platform</td>
-			<td></td>
-		</tr>
-		</table>
-		</td>
-	</tr>
-	</table>
-</section>
+	<status-system></status-system>
 </main>
 
 
