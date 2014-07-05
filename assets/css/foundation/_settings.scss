@@ -1196,12 +1196,12 @@ $sub-nav-active-cursor: default;
 // $topbar-bg: $topbar-bg-color;
 
 // Height and margin
-// $topbar-height: 45px;
+$topbar-height: 60px;
 // $topbar-margin-bottom: 0;
 
 // Controlling the styles for the title in the top bar
-// $topbar-title-weight: $font-weight-normal;
-// $topbar-title-font-size: rem-calc(17);
+$topbar-title-weight: bold;
+$topbar-title-font-size: rem-calc(24);
 
 // Style the top bar dropdown elements
 // $topbar-dropdown-bg: #333;
@@ -1264,7 +1264,7 @@ $sub-nav-active-cursor: default;
 // ICON BAR
 
 // We use these to style the icon-bar and items
-$icon-bar-bg: #444488;
+// $icon-bar-bg: #444488;
 // $icon-bar-font-color: #fff;
 // $icon-bar-font-size: 1rem;
 // $icon-bar-hover-color: $primary-color;

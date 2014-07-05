@@ -3,6 +3,11 @@
 @import "foundation";
 
 
+// Header TopBar
+.top-bar h1 {
+	font-family: "Courier New", Courier, monospace;
+}
+
 // Paragraph
 p {
 	text-justify: justify;
@@ -41,6 +46,13 @@ footer .side-nav li {
 	margin-bottom: 2em;
 }
 
+
+// section warning
+section.warning {
+	background-color: #EEEEAA;
+};
+
+
 // section important
 section.important {
 	text-align: center;
@@ -50,3 +62,4 @@ section.important {
 	font-family: "Open Sans", "Trebuchet MS", sans-serif;
 	font-size: 1.2em;
 }
+
