@@ -5,11 +5,9 @@
 	<meta charset="utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<link rel="stylesheet" href="/css/normalize.min.css" />
-	<link rel="stylesheet" href="/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="/css/font-awesome.min.css">
 	<link rel="stylesheet" href="/css/web.css" />
 	<script src="/js/jquery.min.js"></script>
-	<script src="/js/bootstrap.min.js"></script>
 	<script src="/js/angular.min.js"></script>
 	<script src="/js/web.js"></script>
 	<link rel="shortcut icon" href="/favicon.ico" />
@@ -19,16 +17,17 @@
 <body ng-app="web">
 
 <header>
-	<web-header></web-header>
+	<web-header ng-init="menu.set(2)"></web-header>
+	<status-header></status-header>
 </header>
 
 
-<main class="container">
+<main>
 <section>
 	<table>
 	<tr>
 		<td>Name</td>
-		<td></td>
+		<td><i class="fa fa-camera-retro fa-lg fa-5x"></i></td>
 	</tr>
 	<tr>
 		<td>Time</td>

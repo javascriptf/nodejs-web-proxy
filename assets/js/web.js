@@ -1,25 +1,5 @@
 var web = angular.module('web', []);
 
-// ----------
-// Directives
-// ----------
-
-// web-header directive
-web.directive('webHeader', function () {
-	return {
-		restrict: 'E',
-		templateUrl: '/html/web-header.html'
-	};
-});
-
-// web-footer directive
-web.directive('webFooter', function() {
-	return {
-		restrict: 'E',
-		templateUrl: '/html/web-footer.html'
-	};
-});
-
 
 // -----------
 // Controllers
@@ -35,3 +15,49 @@ web.controller('ApiController', ['$http', function($http) {
 		});
 	}, 3000);
 }]);
+
+
+
+// ----------
+// Directives
+// ----------
+
+// status-header directive
+web.directive('statusHeader', function() {
+	return {
+		restrict: 'E',
+		templateUrl: '/html/status-header.html'
+	};
+});
+
+
+// web-header directive
+web.directive('webHeader', function () {
+	return {
+		restrict: 'E',
+		templateUrl: '/html/web-header.html',
+		controller: function() {
+			this.value = 0;
+
+			// select menu
+			this.set = function(val) {
+				this.value = val;
+			}
+
+			// is selected?
+			this.is = function(val) {
+				return this.value === val;
+			}
+		},
+		controllerAs: 'menu'
+	};
+});
+
+
+// web-footer directive
+web.directive('webFooter', function() {
+	return {
+		restrict: 'E',
+		templateUrl: '/html/web-footer.html'
+	};
+});

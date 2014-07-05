@@ -5,8 +5,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-	<link rel="stylesheet" href="/css/normalize.min.css"/>
-	<link rel="stylesheet" href="/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/font-awesome.min.css">
 	<link rel="stylesheet" href="/css/web.css"/>
 	<script src="/js/jquery.min.js"></script>
 	<script src="/js/angular.min.js"></script>
@@ -18,22 +17,22 @@
 <body ng-app="web">
 
 <header>
-	<web-header></web-header>
+	<web-header ng-init="menu.set(-1)"></web-header>
 </header>
 
 
 <main>
-<div class="jumbotron row">
-	<div class="col-md-4 clearfix">
+<div class="message row">
+	<div class="small-6 large-4 columns">
 		<img class="logo" alt="404" src="/img/angry-hare.png">		
 	</div>
-	<div class="col-md-8 clearfix">
-		<h1>404 | Unexpected request</h1>
+	<div class="small-6 large-8 columns">
+		<h1>404: Unexpected request</h1>
 		<p>
 			The resource you are looking for is either does not exist or has been removed from the system.
 			This problem may also have ocurred because of an incorrectly typed URL.
 		</p>
-		<a href="/" class="btn btn-primary">Return to home page</a>
+		<a href="/" class="button">Return to home page</a>
 	</div>
 </div>
 </main>

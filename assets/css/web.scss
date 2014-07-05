@@ -3,4 +3,50 @@
 @import "foundation";
 
 
-// My Custom CSS here
+// Paragraph
+p {
+	text-justify: justify;
+}
+
+
+// Footer
+footer {
+	font-family: "Trebuchet MS", sans-serif;
+	background-color: #AAEEAA;
+}
+footer .row {
+	padding-top: 1em;
+	padding-bottom: 1em;
+	border-bottom: 1px solid #AADDAA;
+}
+footer .side-nav li {
+	float: right;
+}
+
+
+// Message Gapping
+.message {
+	padding-top: 8em;
+	padding-bottom: 8em;
+}
+.message h1 {
+	margin-bottom: 1em;
+}
+.message p {
+	margin-top: 2em;
+	margin-bottom: 2em;
+}
+.message a {
+	margin-top: 2em;
+	margin-bottom: 2em;
+}
+
+// section important
+section.important {
+	text-align: center;
+	background-color: #AAAAEE;
+}
+.important p {
+	font-family: "Open Sans", "Trebuchet MS", sans-serif;
+	font-size: 1.2em;
+}
