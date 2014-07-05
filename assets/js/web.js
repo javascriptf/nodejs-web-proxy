@@ -23,12 +23,45 @@ web.controller('ApiController', ['$http', function($http) {
 // ----------
 
 // status-system directive
-web.directive('statusSystem', function() {
+web.directive('statusSystem', ['$http', function($http) {
 	return {
 		restrict: 'E',
-		templateUrl: '/html/status-system.html'
+		templateUrl: '/html/status-system.html',
+		controller: function() {
+			var obj = this;
+			obj.status = {
+				'name': '-',
+				'tmpdir': '-',
+				'time': '-',
+				'uptime': '-',
+				'mem': {
+					'free': '-',
+					'total': '-'
+				},
+				'load': '-',
+				'os': {
+					'type': '-',
+					'release': '-',
+					'platform': '-'
+				},
+				'cpu': {
+					'type': [],
+					'arch': '-',
+					'endian': '-'
+				},
+				'network': []
+			};
+
+	
+			setInterval(function() {
+				$http.get('/api/data?system.status').success(function(data) {
+					obj.status = data[0];
+				});
+			}, 3000);
+		},
+		controllerAs: 'stSys'
 	};
-});
+}]);
 
 
 // status-header directive

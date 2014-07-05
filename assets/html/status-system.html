@@ -1,54 +1,56 @@
-<section class="row">
-<table class="small-6 columns">
-<tr>
-	<td>Name</td>
-	<td></td>
-</tr>
-<tr>
-	<td>Time</td>
-	<td></td>
-</tr>
-<tr>
-	<td>Uptime</td>
-	<td></td>
-</tr>
-<tr>
-	<td>Load</td>
-	<td></td>
-</tr>
-<tr>
-	<td>Memory</td>
-	<td>
-	<table>
-	<tr>
-		<td>Free</td>
-		<td></td>
-	</tr>
-	<tr>
-		<td>Total</td>
-		<td></td>
-	</tr>
-	</table>
-	</td>
-</tr>
-<tr>
-	<td>OS</td>
-	<td>
-	<table>
-	<tr>
-		<td>Type</td>
-		<td></td>
-	</tr>
-	<tr>
-		<td>Release</td>
-		<td></td>
-	</tr>
-	<tr>
-		<td>Platform</td>
-		<td></td>
-	</tr>
-	</table>
-	</td>
-</tr>
-</table>
+<section class="info row text-center">
+<div class="small-6 columns">
+<div class="row">
+	<div class="small-4 columns">
+		<h3>Name</h3>
+		<p>{{ stSys.status.name }}</p>
+	</div>
+	<div class="small-4 columns">
+		<h3>Time</h3>
+		<p>{{ stSys.status.time }}</p>
+	</div>
+	<div class="small-4 columns">
+		<h3>Uptime</h3>
+		<p>{{ stSys.status.uptime }}</p>
+	</div>
+</div>
+<div class="row">
+	<div class="small-4 columns">
+		<h3>Load</h3>
+		<p>{{ stSys.status.load }}</p>
+	</div>
+	<div class="small-8 columns">
+	<h3>Memory</h3>
+	<div class="row">
+		<div class="small-6 columns">
+			<h4>Free</h4>
+			<p>{{ stSys.status.mem.free }}</p>
+		</div>
+		<div class="small-6 columns">
+			<h4>Total</h4>
+			<p>{{ stSys.status.mem.total }}</p>
+		</div>
+	</div>
+	</div>
+</div>
+<div class="row">
+	<div class="small-12 columns">
+		<h3>OS</h3>
+		<div class="row">
+			<div class="small-4 columns">
+				<h4>Type</h4>
+				<p>{{ stSys.status.os.type }}</p>
+			</div>
+			<div class="small-4 columns">
+				<h4>Release</h4>
+				<p>{{ stSys.status.os.release }}</p>
+			</div>
+			<div class="small-4 columns">
+				<h4>Platform</h4>
+				<p>{{ stSys.status.os.platform }}</p>
+			</div>
+		</div>
+	</div>
+</div>
+</div>
 </section>
