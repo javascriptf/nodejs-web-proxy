@@ -34,12 +34,12 @@
  * ------------
  * Proxy Module
  * ------------
- * 
+ *
  * File: app-proxy.js
  * Project: Web Proxy
- * 
+ *
  * Provides an HTTP Proxy (without routing) along with its monitoring.
- * 
+ *
  */
 
 
@@ -97,16 +97,17 @@ module.exports = function(inj) {
 	inj.data.history = history;
 	inj.data.record = record;
 	var log = inj.log;
-
-
+	
+	
 	// record begining of a proxy request
 	inj.code.recBeginRequest = function(req) {
 		++status.request.pending;
 		var id = ++status.request.total;
 		var addr = req.headers['user-agent'];
-		if(record.active.length >= 32 &&
+		if (record.active.length >= 32 &&
 			record.active[0].response.complete === false) {
-			--status.request.pending; ++status.request.failed;
+			--status.request.pending;
+			++status.request.failed;
 			tank.add(record.failed, record.active[0]);
 		}
 		tank.add(record.active, {
@@ -130,8 +131,8 @@ module.exports = function(inj) {
 
 	// record ending of a proxy request
 	inj.code.recEndRequest = function(id) {
-		for(var i=0; i<record.active.length; i++) {
-			if(record.active[i].id !== id) continue;
+		for (var i = 0; i < record.active.length; i++) {
+			if (record.active[i].id !== id) continue;
 			record.active[i].request.complete = true;
 			break;
 		}
@@ -142,8 +143,8 @@ module.exports = function(inj) {
 	inj.code.recBeginResponse = function(id, res) {
 		--status.request.pending;
 		++status.response.total;
-		for(var i=0; i<record.active.length; i++) {
-			if(record.active[i].id !== id) continue;
+		for (var i = 0; i < record.active.length; i++) {
+			if (record.active[i].id !== id) continue;
 			record.active[i].response = {
 				'time': process.hrtime()[0],
 				'status': res.statusCode,
@@ -158,8 +159,8 @@ module.exports = function(inj) {
 
 	// record ending of a proxy response
 	inj.code.recEndResponse = function(id) {
-		for(var i=0; i<record.active.length; i++) {
-			if(record.active[i].id !== id) continue;
+		for (var i = 0; i < record.active.length; i++) {
+			if (record.active[i].id !== id) continue;
 			record.active[i].response.complete = true;
 		}
 	};
@@ -183,15 +184,16 @@ module.exports = function(inj) {
 		sHdr['transfer-encoding'] = 'chunked';
 		sHdr['connection'] = 'keep-alive';
 		sHdr['content-length'] = 0;
-		log.add('['+id+'] Server Proxy Response started.');
+		log.add('[' + id + '] Server Proxy Response started.');
 		res.writeHead(sRes.statusCode, sHdr);
-		sRes.on('data', function (chunk) {
+		sRes.on('data', function(chunk) {
 			res.write(chunk);
 		});
 		sRes.on('end', function() {
-			if(sRes.trailers != null) res.addTrailers(sRes.trailers);
-			res.end(); inj.code.recEndResponse(id);
-			log.add('['+id+'] Server Proxy Response complete.');
+			if (sRes.trailers != null) res.addTrailers(sRes.trailers);
+			res.end();
+			inj.code.recEndResponse(id);
+			log.add('[' + id + '] Server Proxy Response complete.');
 		});
 	};
 
@@ -211,21 +213,22 @@ module.exports = function(inj) {
 			'path': addr,
 			'headers': hReq
 		};
-		log.add('['+id+'] Request is: '+JSON.stringify(options));
-		log.add('['+id+'] Proxy Request to Server: '+addr+'.');
-		var sReq = http.request(options, function (sRes) {
+		log.add('[' + id + '] Request is: ' + JSON.stringify(options));
+		log.add('[' + id + '] Proxy Request to Server: ' + addr + '.');
+		var sReq = http.request(options, function(sRes) {
 			inj.code.handleRes(id, res, sRes);
 		});
 		sReq.on('error', function(err) {
-			log.add('['+id+'] Problem with proxy request: '+err.message+'.');
+			log.add('[' + id + '] Problem with proxy request: ' + err.message + '.');
 		});
 		req.on('data', function(chunk) {
 			sReq.write(chunk);
 		});
 		req.on('end', function() {
-			if(req.trailers !== null) sReq.addTrailers(req.trailers);
-			sReq.end(); inj.code.recEndRequest(id);
-			log.add('['+id+'] Server Proxy Request complete.');
+			if (req.trailers !== null) sReq.addTrailers(req.trailers);
+			sReq.end();
+			inj.code.recEndRequest(id);
+			log.add('[' + id + '] Server Proxy Request complete.');
 		});
 	};
 
