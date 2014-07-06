@@ -12,7 +12,7 @@
 
 // dependencies
 var os = require('os');
-var tank = require('./tank.js')();
+var tank = require('./tank')();
 
 
 module.exports = function(dep, inj) {

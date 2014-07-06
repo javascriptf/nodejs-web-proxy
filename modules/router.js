@@ -1,85 +1,79 @@
-/* ----------------------------------------------------------------------- *
- *
- *	 Copyright (c) 2014, Subhajit Sahu
- *	 All rights reserved.
- *
- *   Redistribution and use in source and binary forms, with or without
- *   modification, are permitted provided that the following
- *   conditions are met:
- *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
- *
- *     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
- *     CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
- *     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- *     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- *     CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- *     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- *     NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- *     HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- *     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- *     OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * ----------------------------------------------------------------------- */
-
-/* 
- * -----------
- * Web Routing
- * -----------
- * 
- * File: app-route.js
- * Project: Web Proxy
+/* -------------
+ * Router (HTTP)
+ * -------------
  * 
  * Routes a request path to appropriate handler.
  * 
+ * License:
+ * Web Proxy, Copyright (c) 2010-2014, Subhajit Sahu, All Rights Reserved.
+ * see: /LICENSE.txt for details.
  */
 
 
-module.exports = function(inj) {
-	
+// dependencies
+var express = require('express');
+var httpio = require('./httpio');
 
-	// fetch dependencies
-	var log = inj.log;
-	var web = inj.router;
-	var app = inj.code;
-	var api = app.api;
+
+module.exports = function(dep, inj) {
+	// initialize
+	var io = httpio();
+	var web = express();
+	var log = dep.log;
+	var api = dep.api;
+	var proxy = dep.proxy;
+	var staticDir = dep.staticDir;
 
 
 	// root web page
 	web.get('/', function(req, res) {
-		log.add('Root Web Page accessed.');
-		app.sendHtml(res, 'assets/html/index.html');
+		log.write('Root Web Page accessed.');
+		io.writeHtml(res, 'assets/html/index.html');
 	});
 
 
 	// status web page
 	web.get('/status', function(req, res) {
-		log.add('Status Web page accessed.');
-		app.sendHtml(res, 'assets/html/status.html');
+		log.write('Status Web page accessed.');
+		io.writeHtml(res, 'assets/html/status.html');
 	});
 
 
+	// get request headers and data
+	web.all('/api/request', function(req, res) {
+		var reqMsg = io.readJson(req);
+		reqMsg.on('end' );
+		'method': req.method,
+		'host': host,
+		'path': addr,
+		'headers': hReq
+	});
+
 	// data api access
 	web.get('/api/data', function(req, res) {
-		log.add('Data API accessed.');
+		log.write('Data API accessed.');
 		api.onDataReq(req, res);
 	});
 
 	
 	// proxy access
 	web.all('/proxy', function(req, res) {
-		log.add('Proxy accessed.');
-		app.proxy.handleReq(req, res);
+		log.write('Proxy accessed.');
+		proxy.handleReq(req, res);
 	});
 
 
-	return inj;
+	// static files
+	web.use(express.static(staticDir));
+
+
+	// wrong path
+	web.use(function(req, res, next) {
+		log.write('Wrong Path ['+req.url+'] accessed.');
+		io.writeHtml(res, 'assets/html/404.html');
+	});
+
+
+	// return
+	return web;
 };

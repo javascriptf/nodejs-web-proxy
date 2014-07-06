@@ -71,17 +71,6 @@ mRoute({
 });
 
 
-// Static files
-web.use(express.static(__dirname + '/assets'));
-
-
-// Wrong path
-web.use(function(req, res, next) {
-	log.add('Wrong Path['+req.url+'] accessed.');
-	app.sendHtml(res, 'assets/html/404.html');
-});
-
-
 // Create HTTP Server
 var server = web.listen(config.port, function() {
 	// log the start of server
