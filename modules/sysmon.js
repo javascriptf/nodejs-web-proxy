@@ -71,7 +71,9 @@ module.exports = function(dep, inj) {
 
 
 	// return
-	inj.status = o.status;
-	inj.history = o.history;
+	if(typeof inj !== 'undefined') {
+		inj.status = o.status;
+		inj.history = o.history;
+	}
 	return o;
 };

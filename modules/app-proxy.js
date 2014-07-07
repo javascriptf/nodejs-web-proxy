@@ -13,9 +13,9 @@
 // dependencies
 var url = require('url');
 var http = require('http');
-var obj = require('./obj')();
 var tank = require('./tank')();
 var config = require('./config')();
+var objbuild = require('./objbuild')();
 
 
 module.exports = function(dep, inj) {
@@ -151,7 +151,8 @@ module.exports = function(dep, inj) {
 		log.write('['+id+'] Server Proxy Response started.');
 		res.writeHead(sRes.statusCode, sHdr);
 		sRes.on('error', function(e) {
-			
+			res.writeHead(400, {'retry-after': 2});
+			res.end();
 		})
 		sRes.on('data', function(chunk) {
 			res.write(chunk);
@@ -167,35 +168,39 @@ module.exports = function(dep, inj) {
 
 	// handle request from user
 	o.handleReq = function(req, res) {
+		// handle error in request
+		var err = null;
+		req.on('error', function(e) {
+			err = e; res.end();
+		});
 		// prepare remote request options
-		var id = inj.code.recBeginRequest(req);
-		var hReq = req.headers;
-		var addr = hReq['user-agent'];
-		var host = url.parse(addr).host;
-		hReq['user-agent'] = config.usrAgent;
-		hReq['host'] = host;
+		var id = o.recReqBegin(req);
+		var hdr = req.headers;
+		var addr = url.parse(hdr['user-agent']);
+		hdr['user-agent'] = config.usrAgent;
+		hdr['host'] = host;
 		var options = {
 			'method': req.method,
-			'host': host,
-			'path': addr,
+			'hostname': addr.hostname,
+			'auth': addr.auth,
+			'port': addr.port,
+			'path': addr.path+addr.hash,
 			'headers': hReq
 		};
-		log.add('[' + id + '] Request is: ' + JSON.stringify(options));
-		log.add('[' + id + '] Proxy Request to Server: ' + addr + '.');
+		log.write('['+id+'] Request address to Proxy: '+addr.href+'.');
 		var sReq = http.request(options, function(sRes) {
-			inj.code.handleRes(id, res, sRes);
+			o.handleRes(id, res, sRes);
 		});
 		sReq.on('error', function(err) {
-			log.add('[' + id + '] Problem with proxy request: ' + err.message + '.');
+			log.write('['+id+'] Problem with proxy request: '+err.message+'.');
 		});
 		req.on('data', function(chunk) {
 			sReq.write(chunk);
 		});
 		req.on('end', function() {
 			if (req.trailers !== null) sReq.addTrailers(req.trailers);
-			sReq.end();
-			inj.code.recEndRequest(id);
-			log.add('[' + id + '] Server Proxy Request complete.');
+			sReq.end(); o.recReqEnd(id);
+			log.write('[' + id + '] Server Proxy Request complete.');
 		});
 	};
 

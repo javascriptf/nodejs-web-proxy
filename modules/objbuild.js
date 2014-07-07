@@ -20,7 +20,7 @@ module.exports = function(dep, inj) {
 		var mrg = '';
 		for(var i=0; i<arr.length; i++) {
 			var str = JSON.stringify(arr[i]);
-			mrg += ((i > 0)? ',' : '') + str.slice(1, str.length-1);
+			mrg += ((i > 0)? ',':'') + str.slice(1, str.length-1);
 		}
 		return JSON.parse('{'+mrg+'}');
 	}

@@ -14,7 +14,7 @@
 var tank = require('./tank')();
 
 
-module.exports = function(inj) {
+module.exports = function(dep, inj) {
 	// initialize
 	var o = {};
 
@@ -75,7 +75,9 @@ module.exports = function(inj) {
 
 
 	// return
-	inj.status = o.status;
-	inj.history = o.history;
+	if(typeof inj !== 'undefined') {
+		inj.status = o.status;
+		inj.history = o.history;
+	}
 	return o;
 };
