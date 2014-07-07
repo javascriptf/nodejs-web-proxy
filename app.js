@@ -10,26 +10,13 @@
  */
 
 
-// load express
-var express = require('express');
-var web = express();
-
-// load modules
-var mLog = require('./modules/app-log.js');
-var mApi = require('./modules/app-api.js');
-var mSend = require('./modules/app-send.js');
-var mProxy = require('./modules/app-proxy.js');
-var mRoute = require('./modules/app-route.js');
-var mConfig = require('./modules/app-config.js');
-var mSystem = require('./modules/app-system.js');
-var mProcess = require('./modules/app-process.js');
+// dependencies
+var log = require('./modules/logger')();
+var config = require('./modules/config')();
+var web = require('./modules/app-router')({'log': log, 'staticDir': __dirname+'/assets'});
 
 
-// inlitialize modules
-var log = mLog({});
-var config = mConfig({});
-
-
+/*
 var app = {
 	'data': {
 		'log': log,
@@ -69,12 +56,14 @@ mRoute({
 	'code': app,
 	'router': web
 });
+*/
 
 
 // Create HTTP Server
 var server = web.listen(config.port, function() {
 	// log the start of server
-	log.add('Proxy started on port '+config.port+'.');
+	log.write('Proxy started on port '+config.port+'.');
+	/*
 	//  update status every 5s
 	setInterval(function() {
 		app.process.updateStatus();
@@ -86,4 +75,5 @@ var server = web.listen(config.port, function() {
 		app.system.updateHistory();
 		app.proxy.updateHistory();
 	}, 60*1000);
+	*/
 });

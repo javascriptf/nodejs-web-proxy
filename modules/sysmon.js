@@ -53,7 +53,7 @@ module.exports = function(dep, inj) {
 	};
 
 
-	// update status
+	// update system status
 	o.updateStatus = function() {
 		o.status.time = process.hrtime()[0];
 		o.status.uptime = os.uptime();
@@ -62,7 +62,7 @@ module.exports = function(dep, inj) {
 	};
 
 
-	// update history
+	// update system history
 	o.updateHistory = function() {
 		tank.add(o.history.time, process.hrtime()[0]);
 		tank.add(o.history.mem.free, os.freemem());

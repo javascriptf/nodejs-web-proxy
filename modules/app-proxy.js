@@ -142,14 +142,17 @@ module.exports = function(dep, inj) {
 	// handle response from server
 	o.handleRes = function(id, res, sRes) {
 		// tweak content-length
-		inj.code.recBeginResponse(id, sRes);
+		o.recResBegin(id, sRes);
 		var sHdr = sRes.headers;
 		sHdr['server'] = sHdr['content-length'];
 		sHdr['transfer-encoding'] = 'chunked';
-		sHdr['connection'] = 'keep-alive';
+		// sHdr['connection'] = 'keep-alive';
 		sHdr['content-length'] = 0;
-		log.add('[' + id + '] Server Proxy Response started.');
+		log.write('['+id+'] Server Proxy Response started.');
 		res.writeHead(sRes.statusCode, sHdr);
+		sRes.on('error', function(e) {
+			
+		})
 		sRes.on('data', function(chunk) {
 			res.write(chunk);
 		});

@@ -15,7 +15,7 @@ module.exports = function(dep, inj) {
 	// initialize
 	var o = {};
 	o.data = [];
-	o.maxLen = dep.maxLen || 32;
+	o.maxLen = (dep !== undefined)? dep.maxLen || 32 : 32;
 
 
 	// clear logs
@@ -33,7 +33,9 @@ module.exports = function(dep, inj) {
 
 
 	// return
-	inj.data = o.data;
-	inj.maxLen = o.maxLen;
+	if(inj !== undefined) {
+		inj.data = o.data;
+		inj.maxLen = o.maxLen;
+	}
 	return o;
 };

@@ -18,7 +18,7 @@ var events = require('events');
 module.exports = function(dep, inj) {
 	// initialize
 	var o = {};
-	o.buffSize = dep.buffSize || 8192;
+	o.buffSize = (dep !== undefined)? dep.buffSize || 8192 : 8192;
 
 	
 	// send json data
@@ -37,22 +37,22 @@ module.exports = function(dep, inj) {
 	};
 
 
-	// receive json data
-	o.readJson = function(req) {
-		var buffer = '';
-		var tooBig = false;
+	// receive data
+	o.readData = function(req) {
+		var err = null;
+		var data = '';
 		var evnt = new events.EventEmitter();
 		req.on('data', function(chunk) {
-			if(buffer.length < o.buffSize) {
-				buffer += chunk;
-				evnt.emit('data');
-			}
-			else tooBig = true;
+			if(data.length < o.buffSize) data += chunk;
+			else err = (err !== null)? new Error('TOOBIG') : err;
+		});
+		req.on('error', function(e) {
+			evnt.emit('error', e);
 		});
 		req.on('end', function() {
-			if(tooBig) evnt.emit('error');
-			evnt.emit('end');
-		})
+			if(err !== null) evnt.emit('error', err);
+			evnt.emit('end', buffer);
+		});
 		return evnt;
 	};
 

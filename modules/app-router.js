@@ -12,12 +12,10 @@
 
 // dependencies
 var express = require('express');
-var httpio = require('./httpio');
 
 
 module.exports = function(dep, inj) {
 	// initialize
-	var io = httpio();
 	var web = express();
 	var log = dep.log;
 	var api = dep.api;
@@ -28,26 +26,35 @@ module.exports = function(dep, inj) {
 	// root web page
 	web.get('/', function(req, res) {
 		log.write('Root Web Page accessed.');
-		io.writeHtml(res, 'assets/html/index.html');
+		res.sendfile('assets/html/index.html');
 	});
 
 
 	// status web page
 	web.get('/status', function(req, res) {
 		log.write('Status Web page accessed.');
-		io.writeHtml(res, 'assets/html/status.html');
+		res.sendfile('assets/html/status.html');
 	});
 
-
-	// get request headers and data
+/*
+	// !!!!!!get request headers and data
 	web.all('/api/request', function(req, res) {
-		var reqMsg = io.readJson(req);
-		reqMsg.on('end' );
-		'method': req.method,
-		'host': host,
-		'path': addr,
-		'headers': hReq
+		log.write('Request API accessed.');
+		var reqE = io.readData(req);
+		reqE.on('error', function(e) {
+			log.write('Error with request: '+e.message+'.');
+			res.end();
+		});
+		reqE.on('end', function(data) {
+			io.writeJson(res, {
+				'method': req.method,
+				'path': req.url,
+				'headers': req.headers,
+				'data': data
+			});
+		});
 	});
+
 
 	// data api access
 	web.get('/api/data', function(req, res) {
@@ -61,6 +68,7 @@ module.exports = function(dep, inj) {
 		log.write('Proxy accessed.');
 		proxy.handleReq(req, res);
 	});
+*/
 
 
 	// static files
