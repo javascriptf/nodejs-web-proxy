@@ -26,27 +26,31 @@ module.exports = function(dep, inj) {
 
 	// proxy status
 	o.status = {
-		'request': {
-			'total': 0,
-			'pending': 0,
-			'failed': 0
-		},
-		'response': {
-			'total': 0
+		'client': {
+			'request': 0,
+			'response': 0
 		}
+		'proxy': {
+			'request': 0,
+			'response': 0
+		},
+		'pending': 0,
+		'failed': 0
 	};
 
 
 	// proxy history
 	o.history = {
-		'request': {
-			'total': [],
-			'pending': [],
-			'failed': []
-		},
-		'response': {
-			'total': []
+		'client': {
+			'request': [],
+			'response': []
 		}
+		'proxy': {
+			'request': [],
+			'response': []
+		},
+		'pending': [],
+		'failed': []
 	};
 
 
@@ -57,37 +61,37 @@ module.exports = function(dep, inj) {
 	};
 	
 	
-	// record begining of a proxy request
-	o.recReqBegin = function(req) {
-		var sReq = o.status.request;
+	// record client request
+	o.recClientReq = function(req) {
 		var rAct = o.record.active;
-		var id = ++sReq.total; ++sReq.pending;
-		var addr = req.headers['user-agent'];
-		if (rAct.length >= 32 && rAct[0].response.complete === false) {
-			--sReq.pending; ++sReq.failed;
+		var id = ++o.client.request; ++o.status.pending;
+		if (rAct.length >= 32 && rAct[0].response.proxy === null) {
+			--o.status.pending; ++o.status.failed;
 			tank.add(o.record.failed, rAct[0]);
 		}
 		tank.add(rAct, {
 			'id': id,
-			'request': {
-				'time': process.hrtime()[0],
-				'addr': addr,
-				'method': req.method,
-				'headers': obj.copy([req.headers]),
-				'version': req.httpVersion,
-				'trailers': req.trailers,
-				'complete': false
+			'client': {
+				'request': {
+					'time': process.hrtime()[0],
+					'method': req.method,
+					'headers': obj.copy([req.headers]),
+					'version': req.httpVersion,
+					'trailers': req.trailers,
+				},
+				'response': null
 			},
-			'response': {
-				'complete': false
+			'proxy': {
+				'request': null,
+				'response': null
 			}
 		});
 		return id;
 	};
 
 
-	// record ending of a proxy request
-	o.recReqEnd = function(id) {
+	// record proxy request
+	o.recProxyReq = function(id, req) {
 		var rAct = o.record.active;
 		for (var i = 0; i < rAct.length; i++) {
 			if (rAct[i].id !== id) continue;
@@ -205,9 +209,11 @@ module.exports = function(dep, inj) {
 	};
 
 
-	// inject data
-	inj.status = o.status;
-	inj.history = o.history;
-	inj.record = o.record;
+	// return
+	if(typeof inj != 'undefined') {
+		inj.status = o.status;
+		inj.history = o.history;
+		inj.record = o.record;
+	}
 	return o;
 };

@@ -36,22 +36,13 @@ module.exports = function(dep, inj) {
 		res.sendfile('assets/html/status.html');
 	});
 
-/*
-	// !!!!!!get request headers and data
-	web.all('/api/request', function(req, res) {
-		log.write('Request API accessed.');
-		var reqE = io.readData(req);
-		reqE.on('error', function(e) {
-			log.write('Error with request: '+e.message+'.');
-			res.end();
-		});
-		reqE.on('end', function(data) {
-			io.writeJson(res, {
-				'method': req.method,
-				'path': req.url,
-				'headers': req.headers,
-				'data': data
-			});
+	// get request headers
+	web.all('/api/request/headers', function(req, res) {
+		log.write('Request [headers] API accessed.');
+		res.json({
+			'method': req.method,
+			'href': req.url,
+			'headers': req.headers,
 		});
 	});
 
@@ -68,7 +59,6 @@ module.exports = function(dep, inj) {
 		log.write('Proxy accessed.');
 		proxy.handleReq(req, res);
 	});
-*/
 
 
 	// static files
@@ -78,7 +68,7 @@ module.exports = function(dep, inj) {
 	// wrong path
 	web.use(function(req, res, next) {
 		log.write('Wrong Path ['+req.url+'] accessed.');
-		io.writeHtml(res, 'assets/html/404.html');
+		res.status(404).sendfile('assets/html/404.html');
 	});
 
 

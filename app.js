@@ -13,7 +13,7 @@
 // dependencies
 var log = require('./modules/logger')();
 var config = require('./modules/config')();
-var web = require('./modules/app-router')({'log': log, 'staticDir': __dirname+'/assets'});
+var web = require('./modules/router')({'log': log, 'staticDir': __dirname+'/assets'});
 
 
 /*
@@ -62,7 +62,11 @@ mRoute({
 // Create HTTP Server
 var server = web.listen(config.port, function() {
 	// log the start of server
-	log.write('Proxy started on port '+config.port+'.'+abc);
+	var abc = require('url').parse('safasd; asd');
+	var kmn = {};
+	kmn.x = null;
+	if(kmn.x === null) log.write('Yes!');
+	log.write('Proxy started on port '+config.port+'.'+JSON.stringify(abc));
 	/*
 	//  update status every 5s
 	setInterval(function() {

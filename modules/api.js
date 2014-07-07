@@ -15,21 +15,22 @@ module.exports = function(dep, inj) {
 	var o = {};
 	var log = dep.log;
 	var data = dep.data;
-	o.buffSize = (dep !== undefined)? dep.buffSize || 8192 : 8192;
+	try { o.buffSize = dep.buffSize; }
+	catch(e) { o.buffSize = 8192; }
 
 
-	// fetch required data from application datastore
-	var getData = function(req) {
-		var obj = [];
-		for(var i=0; i<req.length; i++) {
-			if(req[i] === '*') obj[i] = data;
-			else if(req[i].search(/[^A-Za-z\.]/) >= 0) obj[i] = {};
+	// fetch from in memory datastore
+	var getData = function(qry) {
+		var ret = [];
+		for(var i=0; i<qry.length; i++) {
+			if(qry[i] === '*') ret[i] = data;
+			else if(qry[i].search(/[^A-Za-z\.]/) >= 0) ret[i] = {};
 			else {
-				try { obj[i] = eval('data.'+req[i]); }
-				catch(err) { data[i] = {}; }
+				try { ret[i] = eval('data.'+qry[i]); }
+				catch(e) { ret[i] = {}; }
 			}
 		}
-		return obj;
+		return ret;
 	};
 
 
@@ -37,22 +38,26 @@ module.exports = function(dep, inj) {
 	o.onDataReq = function(req, res) {
 		var i = req.url.indexOf('?');
 		if(i >= 0) {
-			var query = req.url.slice(i+1).split('&');
-			log.write('URL API query with '+query.length+' requests.');
-			res.json(getData(query)); return;
+			var qry = req.url.slice(i+1).split('&');
+			log.write('URL API query with '+qry.length+' requests.');
+			res.json(getData(qry)); return;
 		}
 		var buff = '';
+		req.on('error', function(err) {
+			res.json(400, {'error': {'message': 'ERRREQ'}});
+			log.write('Invalid URL API query.');
+		})
 		req.on('data', function(chunk) {
 			if(buff.length < o.buffSize) buff += chunk;
 		});
 		req.on('end', function() {
 			try {
-				var query = JSON.parse(buff);
-				log.write('JSON API query with '+query.length+' requests.');
-				res.json(getData(query));
+				var qry = JSON.parse(buff);
+				log.write('JSON API query with '+qry.length+' requests.');
+				res.json(getData(qry));
 			}
-			catch(err) {
-				res.json(400, {'error': {'message': 'ERRREQUEST'}})
+			catch(e) {
+				res.json(400, {'error': {'message': 'ERRREQ'}})
 				log.write('Invalid JSON API query.');
 			}
 		});
