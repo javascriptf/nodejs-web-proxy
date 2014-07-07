@@ -22,6 +22,8 @@ module.exports = function(dep, inj) {
 	// initialize
 	var o = {};
 	var log = dep.log;
+	try { o.maxLen = dep.maxLen; }
+	catch(e) { o.maxLen = 32; }
 
 
 	// proxy status
@@ -64,7 +66,7 @@ module.exports = function(dep, inj) {
 	// record client request
 	o.recClientReq = function(req) {
 		var rAct = o.record.active;
-		var id = ++o.client.request; ++o.status.pending;
+		var id = ++o.status.client.request; ++o.status.pending;
 		if (rAct.length >= 32 && rAct[0].response.proxy === null) {
 			--o.status.pending; ++o.status.failed;
 			tank.add(o.record.failed, rAct[0]);
@@ -75,9 +77,9 @@ module.exports = function(dep, inj) {
 				'request': {
 					'time': process.hrtime()[0],
 					'method': req.method,
-					'headers': obj.copy([req.headers]),
+					'headers': objbuild.copy([req.headers]),
 					'version': req.httpVersion,
-					'trailers': req.trailers,
+					'trailers': req.trailers
 				},
 				'response': null
 			},
@@ -93,41 +95,50 @@ module.exports = function(dep, inj) {
 	// record proxy request
 	o.recProxyReq = function(id, req) {
 		var rAct = o.record.active;
+		++o.status.proxy.request;
 		for (var i = 0; i < rAct.length; i++) {
 			if (rAct[i].id !== id) continue;
-			rAct[i].request.complete = true;
-			break;
+			rAct[i].proxy.request = {
+				'time': process.hrtime()[0],
+				'method': req.method,
+				'headers': objbuild.copy([req.headers]),
+				'version': req.httpVersion,
+				'trailers': req.trailers
+			}; break;
 		}
 	};
 
 
-	// record begining of a proxy response
-	o.recResBegin = function(id, res) {
-		var sReq = o.status.request;
-		var sRes = o.status.response;
+	// record proxy response
+	o.recProxyRes = function(id, res) {
 		var rAct = o.record.active;
-		--sReq.pending; ++sRes.total;
+		++o.status.proxy.response;
 		for (var i = 0; i < rAct.length; i++) {
 			if (rAct[i].id !== id) continue;
-			rAct[i].response = {
+			rAct[i].proxy.response = {
 				'time': process.hrtime()[0],
 				'status': res.statusCode,
-				'headers': obj.copy([res.headers]),
+				'headers': objbuild.copy([res.headers]),
 				'version': res.httpVersion,
-				'trailers': res.trailers,
-				'complete': false
-			};
+				'trailers': res.trailers
+			}; break;
 		}
 	};
 
 
-	// record ending of a proxy response
-	o.recResEnd = function(id) {
+	// record client response
+	o.recClientRes = function(id, res) {
 		var rAct = o.record.active;
+		++o.status.client.response; --o.status.pending;
 		for (var i = 0; i < rAct.length; i++) {
 			if (rAct[i].id !== id) continue;
-			rAct[i].response.complete = true;
-			break;
+			rAct[i].client.response = {
+				'time': process.hrtime()[0],
+				'status': res.statusCode,
+				'headers': objbuild.copy([res.headers]),
+				'version': res.httpVersion,
+				'trailers': res.trailers
+			}; break;
 		}
 	};
 
@@ -136,49 +147,48 @@ module.exports = function(dep, inj) {
 	o.updateHistory = function() {
 		var hReq = o.history.request, hRes = o.history.response;
 		var sReq = o.status.request, sRes = o.status.response;
-		tank.add(hReq.total, sReq.total);
-		tank.add(hReq.failed, sReq.failed);
-		tank.add(hReq.pending, sReq.pending);
-		tank.add(hRes.total, sRes.total);
+		tank.add(o.history.client.request, o.status.client.request);
+		tank.add(o.history.client.response, o.status.client.response);
+		tank.add(o.history.proxy.request, o.status.proxy.request);
+		tank.add(o.history.proxy.response, o.status.proxy.response);
+		tank.add(o.history.pending, o.status.pending);
+		tank.add(o.history.failed, o.status.failed);
 	};
 
 
 	// handle response from server
-	o.handleRes = function(id, res, sRes) {
+	o.handleRes = function(id, res, pRes) {
 		// tweak content-length
-		o.recResBegin(id, sRes);
-		var sHdr = sRes.headers;
-		sHdr['server'] = sHdr['content-length'];
-		sHdr['transfer-encoding'] = 'chunked';
-		// sHdr['connection'] = 'keep-alive';
-		sHdr['content-length'] = 0;
-		log.write('['+id+'] Server Proxy Response started.');
-		res.writeHead(sRes.statusCode, sHdr);
-		sRes.on('error', function(e) {
-			res.writeHead(400, {'retry-after': 2});
+		o.recProxyRes(id, pRes);
+		var hdr = pRes.headers;
+		log.write('['+id+'] Response to Proxy started.');
+		hdr['server'] = hdr['content-length'];
+		hdr['transfer-encoding'] = 'chunked';
+		// hdr['connection'] = 'keep-alive';
+		hdr['content-length'] = 0;
+		res.on('error', function(err) {
+			log.write('['+id+'] Error with response to Client: '+err.message+'.');
+		});
+		res.writeHead(pRes.statusCode, hdr);
+		pRes.on('error', function(err) {
+			log.write('['+id+'] Error with response to Proxy: '+err.message+'.');
 			res.end();
-		})
-		sRes.on('data', function(chunk) {
+		});
+		pRes.on('data', function(chunk) {
 			res.write(chunk);
 		});
-		sRes.on('end', function() {
-			if (sRes.trailers != null) res.addTrailers(sRes.trailers);
-			res.end();
-			inj.code.recEndResponse(id);
-			log.add('[' + id + '] Server Proxy Response complete.');
+		pRes.on('end', function() {
+			if (pRes.trailers) res.addTrailers(pRes.trailers);
+			res.end(); o.recClientRes(id, res);
+			log.add('['+id+'] Response to Client complete.');
 		});
 	};
 
 
-	// handle request from user
+	// handle request from client
 	o.handleReq = function(req, res) {
-		// handle error in request
-		var err = null;
-		req.on('error', function(e) {
-			err = e; res.end();
-		});
 		// prepare remote request options
-		var id = o.recReqBegin(req);
+		var id = o.recClientReq(req);
 		var hdr = req.headers;
 		var addr = url.parse(hdr['user-agent']);
 		hdr['user-agent'] = config.usrAgent;
@@ -192,25 +202,30 @@ module.exports = function(dep, inj) {
 			'headers': hReq
 		};
 		log.write('['+id+'] Request address to Proxy: '+addr.href+'.');
-		var sReq = http.request(options, function(sRes) {
-			o.handleRes(id, res, sRes);
+		req.on('error', function(err) {
+			log.write('['+id+'] Problem with Client request: '+err.message+'.');
+			res.send(500);
 		});
-		sReq.on('error', function(err) {
-			log.write('['+id+'] Problem with proxy request: '+err.message+'.');
+		var pReq = http.request(options, function(pRes) {
+			o.handleRes(id, res, pRes);
+		});
+		pReq.on('error', function(err) {
+			log.write('['+id+'] Problem with Proxy request: '+err.message+'.');
+			res.send(500);
 		});
 		req.on('data', function(chunk) {
-			sReq.write(chunk);
+			pReq.write(chunk);
 		});
 		req.on('end', function() {
-			if (req.trailers !== null) sReq.addTrailers(req.trailers);
-			sReq.end(); o.recReqEnd(id);
-			log.write('[' + id + '] Server Proxy Request complete.');
+			if (req.trailers) pReq.addTrailers(req.trailers);
+			pReq.end(); o.recProxyReq(id, pReq);
+			log.write('['+id+'] Proxy Request complete.');
 		});
 	};
 
 
 	// return
-	if(typeof inj != 'undefined') {
+	if(typeof inj !== 'undefined') {
 		inj.status = o.status;
 		inj.history = o.history;
 		inj.record = o.record;

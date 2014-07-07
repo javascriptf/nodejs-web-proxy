@@ -21,8 +21,8 @@ module.exports = function(dep, inj) {
 
 	// port number the HTTP server runs on
 	o.port = process.env.PORT || 80;
-	
-	
+
+
 	// return
 	return o;
 }

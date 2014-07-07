@@ -10,74 +10,36 @@
  */
 
 
+// datastore
+var data = {
+	'proxy': {},
+	'system': {},
+	'process': {}
+};
+
+
 // dependencies
 var log = require('./modules/logger')();
 var config = require('./modules/config')();
-var web = require('./modules/router')({'log': log, 'staticDir': __dirname+'/assets'});
-
-
-/*
-var app = {
-	'data': {
-		'log': log,
-		'config': config,
-		'process': {},
-		'system': {},
-		'proxy': {}
-	},
-	'process': {},
-	'system': {},
-	'proxy': {},
-	'api': {}
-};
-
-mSend(app);
-mProxy({
-	'data': app.data.proxy,
-	'code': app.proxy,
-	'log': log
-});
-mSystem({
-	'data': app.data.system,
-	'code': app.system
-});
-mProcess({
-	'data': app.data.process,
-	'code': app.process
-});
-mApi({
-	'log': log,
-	'data': app.data,
-	'code': app.api,
-	'sender': app
-});
-mRoute({
-	'log': log,
-	'code': app,
-	'router': web
-});
-*/
+var sysmon = require('./modules/sysmon')(null, data.system);
+var procmon = require('./modules/procmon')(null, data.process);
+var proxy = require('./modules/proxy')({'log': log}, data.proxy);
+var api = require('./modules/api')({'log': log, 'data': data});
+var web = require('./modules/router')({'log': log, 'api':api, 'proxy':proxy, 'staticDir': __dirname+'/assets'});
 
 
 // Create HTTP Server
 var server = web.listen(config.port, function() {
-	// log the start of server
-	var abc = require('url').parse('safasd; asd');
-	var kmn = {};
-	kmn.x = null;
-	if(kmn.x === null) log.write('Yes!');
-	log.write('Proxy started on port '+config.port+'.'+JSON.stringify(abc));
-	/*
+	log.write('Proxy started on port '+config.port+'.');
 	//  update status every 5s
 	setInterval(function() {
-		app.process.updateStatus();
-		app.system.updateStatus();
+		procmon.updateStatus();
+		sysmon.updateStatus();
 	}, 5*1000);
 	// update history every minute
 	setInterval(function() {
-		app.process.updateHistory();
-		app.system.updateHistory();
-		app.proxy.updateHistory();
+		procmon.updateHistory();
+		sysmon.updateHistory();
+		proxy.updateHistory();
 	}, 60*1000);
-	*/
 });
