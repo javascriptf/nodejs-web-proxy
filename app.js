@@ -62,7 +62,7 @@ mRoute({
 // Create HTTP Server
 var server = web.listen(config.port, function() {
 	// log the start of server
-	log.write('Proxy started on port '+config.port+'.'+inj);
+	log.write('Proxy started on port '+config.port+'.'+abc);
 	/*
 	//  update status every 5s
 	setInterval(function() {
