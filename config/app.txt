@@ -1,0 +1,10 @@
+---------
+Web Proxy
+---------
+
+Web Proxy is an free HTTP-only proxy that enables access to websites that might have been blocked by your internet provider.
+It also enables you to bypass any maximum file size rectriction imposed by your internet provider.
+
+License:
+Web Proxy, Copyright (c) 2010-2014, Subhajit Sahu, All Rights Reserved.
+see: /LICENSE.txt for details.
