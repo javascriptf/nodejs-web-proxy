@@ -24,5 +24,9 @@ module.exports = function(dep, inj) {
 
 
 	// return
+	if(typeof inj != 'undefined') {
+		inj.usrAgent = o.usrAgent;
+		inj.port = o.port;
+	}
 	return o;
 }

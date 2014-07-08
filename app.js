@@ -12,6 +12,8 @@
 
 // datastore
 var data = {
+	'log': {},
+	'config': {},
 	'proxy': {},
 	'system': {},
 	'process': {}
@@ -19,8 +21,8 @@ var data = {
 
 
 // dependencies
-var log = require('./modules/logger')();
-var config = require('./modules/config')();
+var log = require('./modules/logger')(null, data.log);
+var config = require('./modules/config')(null, data.config);
 var sysmon = require('./modules/sysmon')(null, data.system);
 var procmon = require('./modules/procmon')(null, data.process);
 var proxy = require('./modules/proxy')({'log': log}, data.proxy);

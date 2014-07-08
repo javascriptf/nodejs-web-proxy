@@ -1,42 +1,6 @@
-/* ----------------------------------------------------------------------- *
- *
- *	 Copyright (c) 2014, Subhajit Sahu
- *	 All rights reserved.
- *
- *   Redistribution and use in source and binary forms, with or without
- *   modification, are permitted provided that the following
- *   conditions are met:
- *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
- *
- *     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
- *     CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
- *     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- *     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- *     CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- *     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- *     NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- *     HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- *     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- *     OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * ----------------------------------------------------------------------- */
-
-/* 
- * ------------------
+/* ------------------
  * Helper Application
  * ------------------
- * 
- * File: helper.js
- * Project: Web Proxy
  * 
  * This application must run on the user's computer. It creates a local proxy
  * server at 127.0.0.1 (port 8080) which must be entered in proxy settings.
@@ -55,10 +19,13 @@
  *		server port: 80
  * 4. Its done. Time to test.
  * 
+ * License:
+ * Web Proxy, Copyright (c) 2010-2014, Subhajit Sahu, All Rights Reserved.
+ * see: /LICENSE.txt for details.
  */
 
 
-// required modules
+// dependencies
 var fs = require('fs');
 var http = require('http');
 
@@ -70,13 +37,15 @@ var config = {};
 
 // application status
 var status = {
-	'request': {
-		'total': 0,
-		'pending': 0
+	'client': {
+		'request': 0,
+		'response': 0
 	},
-	'response': {
-		'total': 0
-	}
+	'proxy': {
+		'request': 0,
+		'response': 0
+	},
+	'pending': 0
 };
 
 
@@ -91,11 +60,12 @@ app.sendText = function(res, txt) {
 app.showRoot = function(req, res) {
 	if(req.url.indexOf('127.0.0.1') < 0) return false;
 	console.log('Root page accessed.');
-	var txt = 'Request\n-------\n';
-	txt += 'Total: '+status.request.total+'.\n';
-	txt += 'Pending: '+status.request.pending+'.\n\n';
-	txt += 'Response\n--------\n';
-	txt += 'Total: '+status.response.total+'.\n\n';
+	var txt =
+	'Request\n-------\n'+
+	'Total: '+status.request.total+'.\n'+
+	'Pending: '+status.request.pending+'.\n\n'+
+	'Response\n--------\n'+
+	'Total: '+status.response.total+'.\n\n';
 	app.sendText(res, txt);
 	return true;
 }
@@ -148,6 +118,7 @@ app.handleReq = function(req, res) {
 	var sReq = http.request(options, function (sRes) {
 		app.handleRes(id, res, sRes);
 	});
+	sReq.removeHeader('proxy-connection');
 	sReq.on('error', function(err) {
 		console.log('['+id+'] Problem with request: '+err.message);
 	});

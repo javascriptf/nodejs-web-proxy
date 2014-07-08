@@ -31,7 +31,7 @@ module.exports = function(dep, inj) {
 		'client': {
 			'request': 0,
 			'response': 0
-		}
+		},
 		'proxy': {
 			'request': 0,
 			'response': 0
@@ -46,7 +46,7 @@ module.exports = function(dep, inj) {
 		'client': {
 			'request': [],
 			'response': []
-		}
+		},
 		'proxy': {
 			'request': [],
 			'response': []
@@ -67,7 +67,7 @@ module.exports = function(dep, inj) {
 	o.recClientReq = function(req) {
 		var rAct = o.record.active;
 		var id = ++o.status.client.request; ++o.status.pending;
-		if (rAct.length >= 32 && rAct[0].response.proxy === null) {
+		if (rAct.length >= 32 && rAct[0].proxy.response === null) {
 			--o.status.pending; ++o.status.failed;
 			tank.add(o.record.failed, rAct[0]);
 		}
@@ -165,22 +165,28 @@ module.exports = function(dep, inj) {
 		hdr['server'] = hdr['content-length'];
 		hdr['transfer-encoding'] = 'chunked';
 		// hdr['connection'] = 'keep-alive';
-		hdr['content-length'] = 0;
+		hdr['content-length'] = '0';
 		res.on('error', function(err) {
 			log.write('['+id+'] Error with response to Client: '+err.message+'.');
+			res.end();
 		});
 		res.writeHead(pRes.statusCode, hdr);
 		pRes.on('error', function(err) {
 			log.write('['+id+'] Error with response to Proxy: '+err.message+'.');
-			res.end();
+			res.send(500);
 		});
 		pRes.on('data', function(chunk) {
 			res.write(chunk);
 		});
 		pRes.on('end', function() {
 			if (pRes.trailers) res.addTrailers(pRes.trailers);
-			res.end(); o.recClientRes(id, res);
-			log.add('['+id+'] Response to Client complete.');
+			log.write('['+id+'] Response to Client complete.');
+			res.end(); o.recClientRes(id, {
+				'statusCode': pRes.statusCode,
+				'headers': hdr,
+				'httpVersion': pRes.httpVersion,
+				'trailers': pRes.trailers
+			});
 		});
 	};
 
@@ -192,14 +198,14 @@ module.exports = function(dep, inj) {
 		var hdr = req.headers;
 		var addr = url.parse(hdr['user-agent']);
 		hdr['user-agent'] = config.usrAgent;
-		hdr['host'] = host;
+		hdr['host'] = addr.host;
 		var options = {
 			'method': req.method,
 			'hostname': addr.hostname,
 			'auth': addr.auth,
 			'port': addr.port,
-			'path': addr.path+addr.hash,
-			'headers': hReq
+			'path': addr.path+(addr.hash || ''),
+			'headers': hdr
 		};
 		log.write('['+id+'] Request address to Proxy: '+addr.href+'.');
 		req.on('error', function(err) {
@@ -218,8 +224,13 @@ module.exports = function(dep, inj) {
 		});
 		req.on('end', function() {
 			if (req.trailers) pReq.addTrailers(req.trailers);
-			pReq.end(); o.recProxyReq(id, pReq);
 			log.write('['+id+'] Proxy Request complete.');
+			pReq.end(); o.recProxyReq(id, {
+				'method': req.method,
+				'headers': hdr,
+				'httpVersion': req.httpVersion,
+				'trailers':req.trailers
+			});
 		});
 	};
 
