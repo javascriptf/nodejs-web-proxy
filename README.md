@@ -32,6 +32,15 @@ Monitor:
 
 11. Log:
 
+12. req.abort()
+
+13. req.setTimeout()
+
+14. req.setNoDelay()
+
+15. req.setSocketKeepAlive()
+
+
 
 
 Control:
