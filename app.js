@@ -10,38 +10,52 @@
  */
 
 
+
 // datastore
 var data = {
-	'log': {},
-	'config': {},
-	'proxy': {},
-	'system': {},
-	'process': {}
+	'log': 		{},
+	'config': 	{},
+	'proxy': 	{},
+	'system': 	{},
+	'process': 	{}
 };
 
 
+
 // dependencies
-var log = require('./modules/logger')(null, data.log);
-var config = require('./modules/config')(null, data.config);
-var sysmon = require('./modules/sysmon')(null, data.system);
-var procmon = require('./modules/procmon')(null, data.process);
-var proxy = require('./modules/proxy')({'log': log}, data.proxy);
-var api = require('./modules/api')({'log': log, 'data': data});
-var web = require('./modules/router')({'log': log, 'api':api, 'proxy':proxy, 'staticDir': __dirname+'/assets'});
+var fs		= require('fs');
+var log 	= require('./modules/logger')	(null, data.log);
+var config 	= require('./modules/config')	(null, data.config);
+var sysmon 	= require('./modules/sysmon')	(null, data.system);
+var procmon = require('./modules/procmon')	(null, data.process);
+var proxy 	= require('./modules/proxy')	({'log': log}, data.proxy);
+var api 	= require('./modules/api')		({'log': log, 'data': data});
+var web 	= require('./modules/router')	({'log': log, 'api': api, 'proxy': proxy, 'staticDir': __dirname+'/assets'});
+
 
 
 // Create HTTP Server
 var server = web.listen(config.port, function() {
-	log.write('Proxy started on port '+config.port+'.');
-	//  update status every 5s
+
+	// log app info on startup
+	fs.readFile('config/app.txt', function(err, data) {
+		console.log(data);
+		log.write('Started on port: '+config.port+'.');
+	});
+
+	// set socket timeout
+	server.setTimeout(config.timeout);
+
+	//  update status around every 5s
 	setInterval(function() {
 		procmon.updateStatus();
 		sysmon.updateStatus();
-	}, 5*1000);
-	// update history every minute
+	}, config.statusUpdateTime);
+
+	// update history around every minute
 	setInterval(function() {
 		procmon.updateHistory();
 		sysmon.updateHistory();
 		proxy.updateHistory();
-	}, 60*1000);
+	}, config.historyUpdateTime);
 });

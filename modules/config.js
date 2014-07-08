@@ -23,10 +23,21 @@ module.exports = function(dep, inj) {
 	o.port = process.env.PORT || 80;
 
 
+	// milliseconds of inactivity before a socket is presumed to have timed out
+	o.timeout = 1*60*1000;
+
+
+	// status update time in milliseconds
+	o.statusUpdateTime = 5*1000;
+
+
+	// history update time in milliseconds
+	o.historyUpdateTime = 1*60*1000;
+
+
 	// return
 	if(typeof inj != 'undefined') {
-		inj.usrAgent = o.usrAgent;
-		inj.port = o.port;
+		inj = o;
 	}
 	return o;
 }
