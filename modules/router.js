@@ -16,10 +16,10 @@ var express = require('express');
 
 module.exports = function(dep, inj) {
 	// initialize
-	var web = express();
-	var log = dep.log;
-	var api = dep.api;
-	var proxy = dep.proxy;
+	var web 	  = express();
+	var log 	  = dep.log;
+	var api 	  = dep.api;
+	var proxy 	  = dep.proxy;
 	var staticDir = dep.staticDir;
 
 
@@ -40,9 +40,9 @@ module.exports = function(dep, inj) {
 	web.all('/api/request/headers', function(req, res) {
 		log.write('Request [headers] API accessed.');
 		res.json({
-			'method': req.method,
-			'href': req.url,
-			'headers': req.headers,
+			'method': 	req.method,
+			'addr': 	req.url,
+			'headers': 	req.headers,
 		});
 	});
 

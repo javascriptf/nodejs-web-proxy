@@ -29,6 +29,7 @@ module.exports = function(dep, inj) {
 		if(arr.length > 0) arr.shift();
 	}
 
+
 	// return
 	return o;
 };

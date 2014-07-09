@@ -15,7 +15,7 @@ module.exports = function(dep, inj) {
 	// initialize
 	var o = {};
 	o.data = [];
-	try { o.maxLen = dep.maxLen; }
+	try      { o.maxLen = dep.maxLen; }
 	catch(e) { o.maxLen = 32; }
 
 
@@ -35,7 +35,7 @@ module.exports = function(dep, inj) {
 
 	// return
 	if(typeof inj !== 'undefined') {
-		inj.data = o.data;
+		inj.data   = o.data;
 		inj.maxLen = o.maxLen;
 	}
 	return o;

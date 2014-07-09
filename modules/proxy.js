@@ -22,7 +22,7 @@ module.exports = function(dep, inj) {
 	// initialize
 	var o = {};
 	var log = dep.log;
-	try { o.maxLen = dep.maxLen; }
+	try      { o.maxLen = dep.maxLen; }
 	catch(e) { o.maxLen = 32; }
 
 

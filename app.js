@@ -34,10 +34,10 @@ var web 	= require('./modules/router')	({'log': log, 'api': api, 'proxy': proxy,
 
 
 
-// Create HTTP Server
+// create http server
 var server = web.listen(config.port, function() {
 
-	// log app info on startup
+	// log application info on startup
 	fs.readFile('config/app.txt', function(err, data) {
 		console.log(data);
 		log.write('Started on port: '+config.port+'.');
