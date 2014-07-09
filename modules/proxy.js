@@ -42,6 +42,7 @@ module.exports = function(dep, inj) {
 	};
 
 
+
 	// proxy history
 	o.history = {
 		'client': {
@@ -57,11 +58,13 @@ module.exports = function(dep, inj) {
 	};
 
 
+
 	// proxy running record
 	o.record = {
 		'active': [],
 		'failed': []
 	};
+
 	
 	
 	// record client request
