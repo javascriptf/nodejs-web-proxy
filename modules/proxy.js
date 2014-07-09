@@ -11,10 +11,10 @@
 
 
 // dependencies
-var url = require('url');
+var url  = require('url');
 var http = require('http');
-var tank = require('./tank')();
-var config = require('./config')();
+var tank     = require('./tank')();
+var config   = require('./config')();
 var objbuild = require('./objbuild')();
 
 
@@ -26,33 +26,34 @@ module.exports = function(dep, inj) {
 	catch(e) { o.maxLen = 32; }
 
 
+
 	// proxy status
 	o.status = {
 		'client': {
-			'request': 0,
+			'request':  0,
 			'response': 0
 		},
 		'proxy': {
-			'request': 0,
+			'request':  0,
 			'response': 0
 		},
 		'pending': 0,
-		'failed': 0
+		'failed':  0
 	};
 
 
 	// proxy history
 	o.history = {
 		'client': {
-			'request': [],
+			'request':  [],
 			'response': []
 		},
 		'proxy': {
-			'request': [],
+			'request':  [],
 			'response': []
 		},
 		'pending': [],
-		'failed': []
+		'failed':  []
 	};
 
 
