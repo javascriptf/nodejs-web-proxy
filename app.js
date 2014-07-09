@@ -39,7 +39,7 @@ var server = web.listen(config.port, function() {
 
 	// log application info on startup
 	fs.readFile('config/app.txt', function(err, data) {
-		console.log(data);
+		console.log(data.toString());
 		log.write('Started on port: '+config.port+'.');
 	});
 

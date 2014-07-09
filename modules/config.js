@@ -24,7 +24,7 @@ module.exports = function(dep, inj) {
 
 
 	// milliseconds of inactivity before a socket is presumed to have timed out
-	o.timeout = 1*60*1000;
+	o.timeout = 0;
 
 
 	// status update time in milliseconds

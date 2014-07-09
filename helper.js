@@ -113,12 +113,12 @@ app.handleRes = function(id, res, pRes) {
 		console.log('['+id+'] Problem with response: '+err.message);
 		res.abort();
 	});
+	
+	// remove bad headers
+	delete hdr['connection'];
 
 	// write client response headers
 	res.writeHead(pRes.statusCode, hdr);
-	
-	// remove bad headers
-	res.removeHeader('connection');
 	
 	// stream proxy data to client
 	pRes.on('data', function(chunk) {
@@ -168,6 +168,9 @@ app.handleReq = function(req, res) {
 	// set connection header from proxy-connection header
 	if(hdr['proxy-connection']) hdr['connection'] = hdr['proxy-connection'];
 
+	// remove bad headers
+	delete hdr['proxy-connection'];
+
 	// prepare request options
 	var options = {
 		'method': req.method,
@@ -181,9 +184,6 @@ app.handleReq = function(req, res) {
 	var pReq = http.request(options, function (pRes) {
 		app.handleRes(id, res, pRes);
 	});
-
-	// remove bad headers
-	pReq.removeHeader('proxy-connection');
 	
 	// handle error with request
 	pReq.on('error', function(err) {

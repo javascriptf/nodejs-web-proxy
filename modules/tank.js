@@ -12,7 +12,7 @@
  */
 
 
-module.exports = function(dep, inj) {
+module.exports = function(dep, inj) {	
 	// initialize
 	var o = {};
 
