@@ -1,5 +1,33 @@
 <section class="info row full-width text-center">
-<div class="small-6 columns">
+<div class="row full-width">
+	<div class="small-4 columns">
+		<h3>Name</h3>
+		<p>{{ stSys.status.name }}</p>
+	</div>
+	<div class="small-4 columns">
+		<h3>Time</h3>
+		<p>{{ stSys.status.time }}</p>
+	</div>
+	<div class="small-4 columns">
+		<h3>Uptime</h3>
+		<p>{{ stSys.status.uptime }}</p>
+	</div>
+</div>
+<div class="row full-width">
+	<div class="small-4 columns">
+		<h3>Load</h3>
+		<canvas id="myChart" width="400" height="400"></canvas>
+		<p>{{ stSys.status.load }}</p>
+	</div>
+	<div class="small-4 columns">
+		<h3>Mem - Free</h3>
+		<p>{{ stSys.status.mem.free }}</p>
+	</div>
+	<div class="small-4 columns">
+		<h3>Mem - Total</h3>
+		<p>{{ stSys.status.mem.total }}</p>
+	</div>
+</div>
 <table>
 	<tr>
 		<td><h3>Name</h3></td>
@@ -39,8 +67,4 @@
 		<td>{{ stSys.status.os.release }}</td>
 	</tr>
 </table>
-</div>
-<div class="small-6 columns">
-	<canvas id="myChart" width="400" height="400"></canvas>
-</div>
 </section>

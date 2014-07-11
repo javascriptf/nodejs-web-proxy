@@ -1,35 +1,181 @@
+/* --------------------
+ * Main Frontend Script
+ * --------------------
+ * 
+ * This is the main frontend javascript file.
+ * 
+ * License:
+ * Web Proxy, Copyright (c) 2010-2014, Subhajit Sahu, All Rights Reserved.
+ * see: /LICENSE.txt for details.
+ */
+
+
+
+// define angular module
 var web = angular.module('web', []);
 
 
-// -----------
-// Controllers
-// -----------
 
-web.controller('ApiController', ['$http', function($http) {
-	var api = this;
-	api.system = [];
-	
-	setInterval(function() {
-		$http.get('/api/data?system.status').success(function(data) {
-			api.system = data[0];
-		});
-	}, 3000);
-}]);
+// function store
+var app = {};
 
 
 
-// ----------
-// Directives
-// ----------
+// get size in appropriate units
+app.formatSize = function(val, precis) {
+
+	// initialize
+	var o = {};
+
+	do {
+
+		// calculate size in bytes
+		o.val = val;
+		o.unit = 'B';
+		if(o.val < 1024) break;
+
+		// calculate time in minutes
+		o.val /= 1024;
+		o.unit = 'KiB';
+		if(o.val < 1024) break;
+		
+		// calculate time in hours
+		o.val /= 1024;
+		o.unit = 'MiB';
+		if(o.val < 1024) break;
+
+		// calculate time in days
+		o.val /= 1024;
+		o.unit = 'GiB';
+	} while(null);
+
+	// set precision
+	o.val = (new Number(o.val)).toPrecision(precis);
+
+	// return
+	return o;
+};
+
+
+
+// get time in appropriate units
+app.formatTime = function(val, precis) {
+
+	// initialize
+	var o = {};
+
+	do {
+
+		// calculate time in seconds
+		o.val = val;
+		o.unit = 's';
+		if(o.val < 60) break;
+
+		// calculate time in minutes
+		o.val /= 60;
+		o.unit = 'min';
+		if(o.val < 60) break;
+		
+		// calculate time in hours
+		o.val /= 60;
+		o.unit = 'hr';
+		if(o.val < 24) break;
+
+		// calculate time in days
+		o.val /= 24;
+		o.unit = 'day(s)';
+	} while(null);
+
+	// set precision
+	o.val = (new Number(o.val)).toPrecision(precis);
+
+	// return
+	return o;
+};
+
+
+
+// get fraction in percent
+app.formatFraction = function(val, precis) {
+
+	// initialize
+	var o = {
+		'val': val,
+		'unit': '%'
+	};
+
+	// set precision
+	o.val = (new Number(o.val)).toPrecision(precis);
+
+	// return
+	return o;
+};
+
+
+
+// web-footer element directive
+web.directive('webFooter', function() {
+	return {
+
+		// use element only
+		restrict: 'E',
+
+		// content from html
+		templateUrl: '/html/web-footer.html'
+	};
+});
+
+
+
+// web-header element directive
+web.directive('webHeader', function () {
+	return {
+
+		// use element only
+		restrict: 'E',
+
+		// content from html
+		templateUrl: '/html/web-header.html',
+		
+		// controller function
+		controller: function() {
+
+			// initialize
+			var o = this;
+			o.value = 0;
+
+			// select menu
+			o.select = function(val) {
+				o.value = val;
+			}
+
+			// is selected?
+			o.is = function(val) {
+				return o.value === val;
+			}
+		},
+		controllerAs: 'webHdr'
+	};
+});
+
+
 
 // status-system directive
 web.directive('statusSystem', ['$http', function($http) {
 	return {
+
+		// use element only
 		restrict: 'E',
+
+		// content from html
 		templateUrl: '/html/status-system.html',
+
+		// controller function
 		controller: function() {
-			var obj = this;
-			obj.status = {
+
+			// initialize
+			var o = this;
+			o.status = {
 				'name': '-',
 				'tmpdir': '-',
 				'time': '-',
@@ -50,6 +196,17 @@ web.directive('statusSystem', ['$http', function($http) {
 					'endian': '-'
 				},
 				'network': []
+			};
+			o.history = {
+				'time': [],
+				'mem':  { 'free': [] },
+				'load': []
+			};
+
+			o.updateStatus = function(data) {
+				o.status.time = app.formatTime(data.time);
+				o.status.uptime = app.formatTime(data.uptime);
+				o.status.mem.total = 
 			};
 
 			var ctx = document.getElementById("myChart").getContext("2d");
@@ -82,12 +239,18 @@ web.directive('statusSystem', ['$http', function($http) {
 			setInterval(function() {
 				$http.get('/api/data?system.status').success(function(data) {
 					obj.status = data[0];
+					obj.status.time = (new Number(obj.status.time / (60*60))).toPrecision(4) + ' hr';
+					obj.status.uptime = (new Number(obj.status.uptime / (60*60))).toPrecision(4) + ' hr';
+					obj.status.load = (new Number(obj.status.load*100)).toPrecision(3) + ' %';
+					obj.status.mem.free = (new Number(obj.status.mem.free/(1024*1024*1024))).toPrecision(3) + ' GB';
+					obj.status.mem.total = (new Number(obj.status.mem.total/(1024*1024*1024))).toPrecision(3) + ' GB';
 				});
-			}, 3000);
+			}, 5000);
 		},
 		controllerAs: 'stSys'
 	};
 }]);
+
 
 
 // status-header directive
@@ -96,63 +259,30 @@ web.directive('statusHeader', function() {
 		restrict: 'E',
 		templateUrl: '/html/status-header.html',
 		controller: function() {
-			var obj = this;
-			obj.menu = { 'value': 0 };
-			obj.button = { 'value': false };
+			var o = this;
+			o.menu   = { 'value': 0 };
+			o.button = { 'value': false };
 
 			// select menu
-			this.menu.select = function(val) {
-				obj.menu.value = val;
+			o.menu.select = function(val) {
+				o.menu.value = val;
 			};
 
 			// is menu selected?
-			this.menu.is = function(val) {
-				return obj.menu.value === val;
+			o.menu.is = function(val) {
+				return o.menu.value === val;
 			};
 
 			// toggle button
-			this.button.toggle = function() {
-				obj.button.value = !obj.button.value;
+			o.button.toggle = function() {
+				o.button.value = !o.button.value;
 			};
 
 			// is button selected?
-			this.button.is = function() {
-				return obj.button.value;
+			o.button.is = function() {
+				return o.button.value;
 			};
 		},
 		controllerAs: 'stHdr'
-	};
-});
-
-
-// web-header directive
-web.directive('webHeader', function () {
-	return {
-		restrict: 'E',
-		templateUrl: '/html/web-header.html',
-		controller: function() {
-			var obj = this;
-			obj.value = 0;
-
-			// select menu
-			this.select = function(val) {
-				obj.value = val;
-			}
-
-			// is selected?
-			this.is = function(val) {
-				return obj.value === val;
-			}
-		},
-		controllerAs: 'webHdr'
-	};
-});
-
-
-// web-footer directive
-web.directive('webFooter', function() {
-	return {
-		restrict: 'E',
-		templateUrl: '/html/web-footer.html'
 	};
 });

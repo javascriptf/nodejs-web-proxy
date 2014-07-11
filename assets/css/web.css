@@ -1,3 +1,13 @@
+/* ---------------
+ * Main Stylesheet
+ * ---------------
+ * 
+ * This is the main SCSS file.
+ * 
+ * License:
+ * Web Proxy, Copyright (c) 2010-2014, Subhajit Sahu, All Rights Reserved.
+ * see: /LICENSE.txt for details.
+ */
 /*! normalize.css v3.0.1 | MIT License | git.io/normalize */
 /**
  * 1. Set default font family to sans-serif.
@@ -5772,11 +5782,14 @@ th.hide-for-touch {
   margin-right: auto;
   max-width: initial; }
 
+p {
+  text-justify: justify; }
+
 .top-bar h1 {
   font-family: "Courier New", Courier, monospace; }
 
-p {
-  text-justify: justify; }
+header .side-nav li {
+  float: left; }
 
 footer {
   font-family: "Trebuchet MS", sans-serif;
@@ -5786,9 +5799,6 @@ footer .row {
   padding-top: 1em;
   padding-bottom: 1em;
   border-bottom: 1px solid #AADDAA; }
-
-header .side-nav li {
-  float: left; }
 
 footer .side-nav li {
   float: right; }
@@ -5821,3 +5831,9 @@ section.important {
 
 .icon-bar .active {
   background-color: #6666AA; }
+
+.info h3 {
+  font-size: 4em; }
+
+.info p {
+  font-size: 2em; }
