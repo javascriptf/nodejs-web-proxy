@@ -23,6 +23,8 @@
 // full width row
 .full-width {
    width: 100%;
+   padding-left: 2em;
+   padding-right: 2em;
    margin-left: auto;
    margin-right: auto;
    max-width: initial;
@@ -130,9 +132,20 @@ section.important {
 
 // information block
 
+// background color
+.info {
+	background-color: #EEE;
+}
+
+.info .columns:hover {
+	background-color: #F2F2F2;
+}
+
 // field header properties
 .info h3 {
-	font-size: 4em;
+	margin-top: 1em;
+	margin-bottom: 1em;
+	font-size: 3em;
 }
 
 // field text properties

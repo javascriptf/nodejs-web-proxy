@@ -5778,6 +5778,8 @@ th.hide-for-touch {
     display: table-cell !important; } }
 .full-width {
   width: 100%;
+  padding-left: 2em;
+  padding-right: 2em;
   margin-left: auto;
   margin-right: auto;
   max-width: initial; }
@@ -5832,8 +5834,16 @@ section.important {
 .icon-bar .active {
   background-color: #6666AA; }
 
+.info {
+  background-color: #EEE; }
+
+.info .columns:hover {
+  background-color: #F2F2F2; }
+
 .info h3 {
-  font-size: 4em; }
+  margin-top: 1em;
+  margin-bottom: 1em;
+  font-size: 3em; }
 
 .info p {
   font-size: 2em; }

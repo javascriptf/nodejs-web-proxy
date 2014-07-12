@@ -1,0 +1,35 @@
+<section class="info row full-width text-center">
+<div class="row full-width">
+	<div class="small-3 columns">
+		<h3>Name</h3>
+		<p>{{status.name}}</p>
+	</div>
+	<div class="small-3 columns">
+		<h3>Uptime</h3>
+		<p>{{status.uptime}} hr</p>
+	</div>
+	<div class="small-3 columns">
+		<h3>Architecture</h3>
+		<p>{{status.cpu.arch}}</p>
+	</div>
+	<div class="small-3 columns">
+		<h3>Endian</h3>
+		<p>{{status.cpu.endian}}</p>
+	</div>
+</div>
+<div class="row full-width">
+	<div class="small-4 columns">
+		<h3>Load</h3>
+		<div id="systemLoadChart"></div>
+		<p>{{status.load}} %</p>
+	</div>
+	<div class="small-4 columns">
+		<h3>Free</h3>
+		<p>{{status.mem.free}} GB</p>
+	</div>
+	<div class="small-4 columns">
+		<h3>Total</h3>
+		<p>{{status.mem.total}} GB</p>
+	</div>
+</div>
+</section>

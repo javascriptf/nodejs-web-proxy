@@ -21,95 +21,97 @@ var app = {};
 
 
 
-// get size in appropriate units
-app.formatSize = function(val, precis) {
+// unit scale values
+app.format = {};
+app.format.unit = {
+	
+	// size
+	'B':  1,
+	'KB': 1 / Math.pow(1024, 1),
+	'MB': 1 / Math.pow(1024, 2),
+	'GB': 1 / Math.pow(1024, 3),
+	'TB': 1 / Math.pow(1024, 4),
 
-	// initialize
-	var o = {};
+	// time
+	's':      1,
+	'min':    1 / 60,
+	'hr':     1 / (60*60),
+	'day(s)': 1 / (60*60*24),
 
-	do {
-
-		// calculate size in bytes
-		o.val = val;
-		o.unit = 'B';
-		if(o.val < 1024) break;
-
-		// calculate time in minutes
-		o.val /= 1024;
-		o.unit = 'KiB';
-		if(o.val < 1024) break;
-		
-		// calculate time in hours
-		o.val /= 1024;
-		o.unit = 'MiB';
-		if(o.val < 1024) break;
-
-		// calculate time in days
-		o.val /= 1024;
-		o.unit = 'GiB';
-	} while(null);
-
-	// set precision
-	o.val = (new Number(o.val)).toPrecision(precis);
-
-	// return
-	return o;
+	// fraction
+	'%': 100
 };
 
 
 
-// get time in appropriate units
-app.formatTime = function(val, precis) {
-
-	// initialize
-	var o = {};
-
-	do {
-
-		// calculate time in seconds
-		o.val = val;
-		o.unit = 's';
-		if(o.val < 60) break;
-
-		// calculate time in minutes
-		o.val /= 60;
-		o.unit = 'min';
-		if(o.val < 60) break;
-		
-		// calculate time in hours
-		o.val /= 60;
-		o.unit = 'hr';
-		if(o.val < 24) break;
-
-		// calculate time in days
-		o.val /= 24;
-		o.unit = 'day(s)';
-	} while(null);
-
-	// set precision
-	o.val = (new Number(o.val)).toPrecision(precis);
-
-	// return
-	return o;
-};
+// charting options
+app.chart = {};
+app.chart.datasets = [
+    {
+        label:                "Item 1",
+        fillColor:            "rgba(220,220,220,0.2)",
+        strokeColor:          "rgba(220,220,220,1)",
+        pointColor:           "rgba(220,220,220,1)",
+        pointStrokeColor:     "#fff",
+        pointHighlightFill:   "#fff",
+        pointHighlightStroke: "rgba(220,220,220,1)",
+        data: []
+    },
+    {
+        label:                "Item 2",
+        fillColor:            "rgba(151,187,205,0.2)",
+        strokeColor:          "rgba(151,187,205,1)",
+        pointColor:           "rgba(151,187,205,1)",
+        pointStrokeColor:     "#fff",
+        pointHighlightFill:   "#fff",
+        pointHighlightStroke: "rgba(151,187,205,1)",
+        data: []
+    }
+];
 
 
 
-// get fraction in percent
-app.formatFraction = function(val, precis) {
+// object builder
+app.objbuild = {};
 
-	// initialize
-	var o = {
-		'val': val,
-		'unit': '%'
+// get a deep copied, merged JSON object
+app.objbuild.copy = function(arr) {
+    
+    // init merge string
+    var mrg = '';
+
+    // loop through array of json objects
+    for(var i=0; i<arr.length; i++) {
+
+        // stringify and concat with ','
+        var str = JSON.stringify(arr[i]);
+        mrg += ((i > 0)? ',':'') + str.slice(1, str.length-1);
+    }
+
+    // return parsed and merged object
+    return JSON.parse('{'+mrg+'}');
+}
+
+
+
+// format a type of data
+app.formatData = function(data, scale, precis) {
+
+	// get scale factor
+	var sf = (typeof scale === 'string')?
+		app.format.unit[scale] : scale;
+
+	// process single number
+	if(typeof data === 'number') {
+		return (data*sf).toPrecision(precis);
+	}
+
+	// process array
+	for (var i=data.length-1; i>=0; i--) {
+		data[i] = (data[i]*sf).toPrecision(precis);
 	};
-
-	// set precision
-	o.val = (new Number(o.val)).toPrecision(precis);
-
-	// return
-	return o;
-};
+	return data;
+}
 
 
 
@@ -131,6 +133,9 @@ web.directive('webFooter', function() {
 web.directive('webHeader', function () {
 	return {
 
+		// use controller scope
+		scope: true,
+
 		// use element only
 		restrict: 'E',
 
@@ -138,10 +143,10 @@ web.directive('webHeader', function () {
 		templateUrl: '/html/web-header.html',
 		
 		// controller function
-		controller: function() {
+		controller: function($scope) {
 
 			// initialize
-			var o = this;
+			var o = $scope;
 			o.value = 0;
 
 			// select menu
@@ -153,113 +158,30 @@ web.directive('webHeader', function () {
 			o.is = function(val) {
 				return o.value === val;
 			}
-		},
-		controllerAs: 'webHdr'
+		}
 	};
 });
-
-
-
-// status-system directive
-web.directive('statusSystem', ['$http', function($http) {
-	return {
-
-		// use element only
-		restrict: 'E',
-
-		// content from html
-		templateUrl: '/html/status-system.html',
-
-		// controller function
-		controller: function() {
-
-			// initialize
-			var o = this;
-			o.status = {
-				'name': '-',
-				'tmpdir': '-',
-				'time': '-',
-				'uptime': '-',
-				'mem': {
-					'free': '-',
-					'total': '-'
-				},
-				'load': '-',
-				'os': {
-					'type': '-',
-					'release': '-',
-					'platform': '-'
-				},
-				'cpu': {
-					'type': [],
-					'arch': '-',
-					'endian': '-'
-				},
-				'network': []
-			};
-			o.history = {
-				'time': [],
-				'mem':  { 'free': [] },
-				'load': []
-			};
-
-			o.updateStatus = function(data) {
-				o.status.time = app.formatTime(data.time);
-				o.status.uptime = app.formatTime(data.uptime);
-				o.status.mem.total = 
-			};
-
-			var ctx = document.getElementById("myChart").getContext("2d");
-			var myNewChart = new Chart(ctx).Line({
-				labels: ["January", "February", "March", "April", "May", "June", "July"],
-				datasets: [
-				{
-					label: "My First dataset",
-					fillColor: "rgba(220,220,220,0.2)",
-					strokeColor: "rgba(220,220,220,1)",
-					pointColor: "rgba(220,220,220,1)",
-					pointStrokeColor: "#fff",
-					pointHighlightFill: "#fff",
-					pointHighlightStroke: "rgba(220,220,220,1)",
-					data: [65, 59, 80, 81, 56, 55, 40]
-				},
-				{
-					label: "My Second dataset",
-					fillColor: "rgba(151,187,205,0.2)",
-					strokeColor: "rgba(151,187,205,1)",
-					pointColor: "rgba(151,187,205,1)",
-					pointStrokeColor: "#fff",
-					pointHighlightFill: "#fff",
-					pointHighlightStroke: "rgba(151,187,205,1)",
-					data: [28, 48, 40, 19, 86, 27, 90]
-				}
-				]
-			}, {});
-	
-			setInterval(function() {
-				$http.get('/api/data?system.status').success(function(data) {
-					obj.status = data[0];
-					obj.status.time = (new Number(obj.status.time / (60*60))).toPrecision(4) + ' hr';
-					obj.status.uptime = (new Number(obj.status.uptime / (60*60))).toPrecision(4) + ' hr';
-					obj.status.load = (new Number(obj.status.load*100)).toPrecision(3) + ' %';
-					obj.status.mem.free = (new Number(obj.status.mem.free/(1024*1024*1024))).toPrecision(3) + ' GB';
-					obj.status.mem.total = (new Number(obj.status.mem.total/(1024*1024*1024))).toPrecision(3) + ' GB';
-				});
-			}, 5000);
-		},
-		controllerAs: 'stSys'
-	};
-}]);
 
 
 
 // status-header directive
 web.directive('statusHeader', function() {
 	return {
+
+		// use controller scope
+		scope: true,
+
+		// use element only
 		restrict: 'E',
+
+		// content from html
 		templateUrl: '/html/status-header.html',
-		controller: function() {
-			var o = this;
+
+		// controller function
+		controller: function($scope) {
+
+			// initialize
+			var o = $scope;
 			o.menu   = { 'value': 0 };
 			o.button = { 'value': false };
 
@@ -282,7 +204,170 @@ web.directive('statusHeader', function() {
 			o.button.is = function() {
 				return o.button.value;
 			};
-		},
-		controllerAs: 'stHdr'
+		}
 	};
 });
+
+
+
+// status-system directive
+web.directive('systemStatus', ['$http', function($http) {
+	return {
+
+		// use controller scope
+		scope: true,
+
+		// use element only
+		restrict: 'E',
+
+		// content from html
+		templateUrl: '/html/system-status.html',
+
+		// controller function
+		controller: function($scope) {
+
+			// initialize
+			var o = $scope;
+
+            
+            
+			// format status data (scale)
+			o.formatStatus = function() {
+				o.status.time   = app.formatData(o.status.time,   'hr', 3);
+				o.status.uptime = app.formatData(o.status.uptime, 'hr', 3);
+				o.status.load = app.formatData(o.status.load, '%', 3);
+				o.status.mem.free  = app.formatData(o.status.mem.free,  'GB', 3);
+				o.status.mem.total = app.formatData(o.status.mem.total, 'GB', 3);
+			};
+
+            
+            
+			// format history data (scale)
+			o.formatHistory = function() {
+				app.formatData(o.history.time, 'hr', 4);
+				app.formatData(o.history.load, '%', 4)
+				app.formatData(o.history.mem.free, 'GB', 4);
+			};
+
+            
+            
+			// update system status
+			o.updateStatus = function() {
+				$http.get('/api/data?system.status').success(function(data) {
+
+					// initialize and format
+					o.status = data[0];
+					o.formatStatus();
+				});
+			};
+
+            
+            
+            // update system history
+            o.updateHistory = function() {
+                $http.get('/api/data?system.history').success(function(data) {
+                   
+                    // initialize and format
+                    o.history = data[0];
+                    o.formatHistory();
+                    
+                    // create charts
+                    if(!o.loadChart) {
+                        
+                        // get canvas functionality
+                        
+                        // set chart options
+                        var options = {
+                            labels: o.history.time,
+                            datasets: [app.objbuild.copy([app.chart.datasets[0]])]
+                        };
+                        
+                        // initialize line chart
+                        $('#systemLoadChart').highcharts({
+                            chart: {
+                                type: 'area'
+                            },
+                            title: {
+                                text: 'US and USSR nuclear stockpiles'
+                            },
+                            subtitle: {
+                                text: 'Source: <a href="http://thebulletin.metapress.com/content/c4120650912x74k7/fulltext.pdf">'+
+                                    'thebulletin.metapress.com</a>'
+                            },
+                            xAxis: {
+                                allowDecimals: false,
+                                labels: {
+                                    formatter: function() {
+                                        return this.value; // clean, unformatted number for year
+                                    }
+                                }
+                            },
+                            yAxis: {
+                                title: {
+                                    text: 'Nuclear weapon states'
+                                },
+                                labels: {
+                                    formatter: function() {
+                                        return this.value / 1000 +'k';
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                pointFormat: '{series.name} produced <b>{point.y:,.0f}</b><br/>warheads in {point.x}'
+                            },
+                            plotOptions: {
+                                area: {
+                                    pointStart: 1940,
+                                    marker: {
+                                        enabled: false,
+                                        symbol: 'circle',
+                                        radius: 2,
+                                        states: {
+                                            hover: {
+                                                enabled: true
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            series: [{
+                                name: 'USA',
+                                data: [null, null, null, null, null, 6 , 11, 32, 110, 235, 369, 640,
+                                    1005, 1436, 2063, 3057, 4618, 6444, 9822, 15468, 20434, 24126,
+                                    27387, 29459, 31056, 31982, 32040, 31233, 29224, 27342, 26662,
+                                    26956, 27912, 28999, 28965, 27826, 25579, 25722, 24826, 24605,
+                                    24304, 23464, 23708, 24099, 24357, 24237, 24401, 24344, 23586,
+                                    22380, 21004, 17287, 14747, 13076, 12555, 12144, 11009, 10950,
+                                    10871, 10824, 10577, 10527, 10475, 10421, 10358, 10295, 10104 ]
+                            }, {
+                                name: 'USSR/Russia',
+                                data: [null, null, null, null, null, null, null , null , null ,null,
+                                5, 25, 50, 120, 150, 200, 426, 660, 869, 1060, 1605, 2471, 3322,
+                                4238, 5221, 6129, 7089, 8339, 9399, 10538, 11643, 13092, 14478,
+                                15915, 17385, 19055, 21205, 23044, 25393, 27935, 30062, 32049,
+                                33952, 35804, 37431, 39197, 45000, 43000, 41000, 39000, 37000,
+                                35000, 33000, 31000, 29000, 27000, 25000, 24000, 23000, 22000,
+                                21000, 20000, 19000, 18000, 18000, 17000, 16000]
+                            }]
+                        });
+                        o.loadChart.options = options;
+                    }
+                    
+                    // drop new data into chart and update
+                    // o.loadChart.options.datasets[0].data = [0, 1, 2, 3]; // o.history.load;
+                    o.loadChart.update();
+                });
+            };
+
+            
+            
+			// initialize data
+			o.updateStatus();
+            o.updateHistory();
+
+			// update every 5 seconds
+			setInterval(o.updateStatus, 5*1000);
+            setInterval(o.updateHistory, 1*60*1000);
+		}
+	};
+}]);

@@ -11,9 +11,15 @@
 
 <section class="top-bar-section">
 <ul class="right">
-	<li ng-class="{ active: webHdr.is(0) }"><a href="/"><i class="fa fa-home fa-lg"></i> Home</a></li>
-	<li ng-class="{ active: webHdr.is(1) }"><a href="/start"><i class="fa fa-child fa-lg"></i> Getting Started</a></li>
-	<li ng-class="{ active: webHdr.is(2) }"><a href="/status"><i class="fa fa-bolt fa-lg"></i> Running Status</a></li>
+	<li ng-class="{active: is(0)}">
+		<a href="/"><i class="fa fa-home fa-lg"></i> Home</a>
+	</li>
+	<li ng-class="{active: is(1)}">
+		<a href="/start"><i class="fa fa-child fa-lg"></i> Getting Started</a>
+	</li>
+	<li ng-class="{active: is(2)}">
+		<a href="/status"><i class="fa fa-bolt fa-lg"></i> Running Status</a>
+	</li>
 </ul>
 </section>
 </nav>

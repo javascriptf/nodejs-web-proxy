@@ -18,6 +18,7 @@ module.exports = function(dep, inj) {
 
 	// get a deep copied, merged JSON object
 	o.copy = function(arr) {
+        
 		// init merge string
 		var mrg = '';
 
