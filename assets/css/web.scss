@@ -77,29 +77,29 @@ footer .side-nav li {
 
 
 
-// message
+// banner
 
 // use good gaps
-.message {
+.banner {
 	padding-top: 8em;
 	padding-bottom: 8em;
-}
 
-// header gap
-.message h1 {
-	margin-bottom: 1em;
-}
+	// header gap
+	h1 {
+		margin-bottom: 1em;
+	}
 
-// paragraph gap
-.message p {
-	margin-top: 2em;
-	margin-bottom: 2em;
-}
+	// paragraph gap
+	p {
+		margin-top: 2em;
+		margin-bottom: 2em;
+	}
 
-// link gap
-.message a {
-	margin-top: 2em;
-	margin-bottom: 2em;
+	// link gap
+	a {
+		margin-top: 2em;
+		margin-bottom: 2em;
+	}
 }
 
 
@@ -107,20 +107,19 @@ footer .side-nav li {
 // sections
 
 // warning section
-section.warning {
+.warning {
 	background-color: #EEEEAA;
 };
 
 // important section
-section.important {
+.important {
 	text-align: center;
 	background-color: #AAAAEE;
-}
 
-// important section's para style
-.important p {
-	font-family: "Open Sans", "Trebuchet MS", sans-serif;
-	font-size: 1.2em;
+	p {
+		font-family: "Open Sans", "Trebuchet MS", sans-serif;
+		font-size: 1.2em;
+	}
 }
 
 // set icon bar's color
@@ -134,21 +133,39 @@ section.important {
 
 // background color
 .info {
+	padding-top: 2em;
+	padding-bottom: 2em;
 	background-color: #EEE;
-}
 
-.info .columns:hover {
-	background-color: #F2F2F2;
-}
+	a:hover {
+		text-decoration: underline;
+	}
 
-// field header properties
-.info h3 {
-	margin-top: 1em;
-	margin-bottom: 1em;
-	font-size: 3em;
-}
+	.columns:hover {
+		background-color: rgba(250,250,250,0.5);
+	}
 
-// field text properties
-.info p {
-	font-size: 2em;
+	// field header properties
+	h3, h4 {
+		margin-top: 1em;
+		margin-bottom: 1em;
+		font-size: 2em;
+		color: #448;
+	}
+
+	h4 {
+		font-size: 1.5em;
+		color: #337;
+	}
+
+	// field text properties
+	p, ol>li {
+		font-size: 1.2em;
+		color: #303030;
+		overflow: auto;
+	}
+
+	ol {
+		list-style: initial;
+	}
 }

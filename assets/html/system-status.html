@@ -1,35 +1,71 @@
 <section class="info row full-width text-center">
+
 <div class="row full-width">
-	<div class="small-3 columns">
-		<h3>Name</h3>
-		<p>{{status.name}}</p>
+<div class="small-3 columns">
+	<h3>Name</h3>
+	<p>{{status.name}}</p>
+</div>
+<div class="small-3 columns">
+	<h3>Uptime</h3>
+	<p>{{status.uptime | number: 2}} hr</p>
+</div>
+<div class="small-6 columns">
+	<h3>Temporary directory</h3>
+	<p>{{status.tmpdir}}</p>
+</div>
+</div>
+
+<div class="row full-width">
+<div class="small-3 columns">
+	<h3>Architecture</h3>
+	<p>{{status.cpu.arch}}</p>
+</div>
+<div class="small-3 columns">
+	<h3>Endian</h3>
+	<p>{{status.cpu.endian}}</p>
+</div>
+<div class="small-6 columns">
+	<h3>CPU</h3>
+	<p>{{status.cpu.type[0].model}}</p>
+</div>
+</div>
+
+<div class="row full-width">
+<div class="small-6 columns">
+	<h3>Load</h3>
+	<div id="systemLoad"></div>
+	<p>{{status.load | number: 2}} %</p>
+</div>
+<div class="small-6 columns">
+	<h3>Memory</h3>
+	<div id="systemMem"></div>
+	<p>Free: {{status.mem.free | number: 2}} GB | Total: {{status.mem.total | number: 2}} GB</p>
+</div>
+</div>
+
+<div class="row full-width">
+<div class="small-12 columns">
+	<h3>Network Interfaces</h3>
+	<div class="row full-width" ng-repeat="(type,endps) in status.network">
+	<div class="small-12 columns" ng-controller="menuCtrl">
+		<h4><a ng-click="set(1-value)">{{type}}</a></h4>
+		<div class="row full-width" ng-show="is(1)">
+		<div class="small-8 columns">
+			<h4>Address</h4>
+			<p ng-repeat="endp in endps">{{endp.address}}</p>
+		</div>
+		<div class="small-2 columns">
+			<h4>Family</h4>
+			<p ng-repeat="endp in endps">{{endp.family}}</p>
+		</div>
+		<div class="small-2 columns">
+			<h4>Internal</h4>
+			<p ng-repeat="endp in endps">{{endp.internal}}</p>
+		</div>
+		</div>
 	</div>
-	<div class="small-3 columns">
-		<h3>Uptime</h3>
-		<p>{{status.uptime}} hr</p>
-	</div>
-	<div class="small-3 columns">
-		<h3>Architecture</h3>
-		<p>{{status.cpu.arch}}</p>
-	</div>
-	<div class="small-3 columns">
-		<h3>Endian</h3>
-		<p>{{status.cpu.endian}}</p>
 	</div>
 </div>
-<div class="row full-width">
-	<div class="small-4 columns">
-		<h3>Load</h3>
-		<div id="systemLoadChart"></div>
-		<p>{{status.load}} %</p>
-	</div>
-	<div class="small-4 columns">
-		<h3>Free</h3>
-		<p>{{status.mem.free}} GB</p>
-	</div>
-	<div class="small-4 columns">
-		<h3>Total</h3>
-		<p>{{status.mem.total}} GB</p>
-	</div>
 </div>
+
 </section>

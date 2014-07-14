@@ -27,7 +27,7 @@ module.exports = function(dep, inj) {
 
 	// add new log and send to console
 	o.write = function(msg) {
-		if(o.data.length > o.maxLen) o.data.shift();
+		if(o.data.length >= o.maxLen) o.data.shift();
 		o.data[o.data.length] = msg;
 		console.log(msg);
 	}

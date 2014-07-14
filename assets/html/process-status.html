@@ -1,0 +1,64 @@
+<section class="info row full-width text-center">
+
+<div class="row full-width">
+<div class="small-3 columns">
+	<h3>ID</h3>
+	<p>{{status.id}}</p>
+</div>
+<div class="small-3 columns">
+	<h3>Name</h3>
+	<p>{{status.name}}</p>
+</div>
+<div class="small-6 columns">
+	<h3>Execution Arguments</h3>
+	<p>{{status.arg}}</p>
+</div>
+</div>
+
+<div class="row full-width">
+<div class="small-3 columns">
+	<h3>Start Time</h3>
+	<p>{{status.start | number: 2}} hr</p>
+</div>
+<div class="small-3 columns">
+	<h3>Uptime</h3>
+	<p>{{status.uptime | number: 2}} hr</p>
+</div>
+<div class="small-6 columns">
+	<h3>Execution Path</h3>
+	<p>{{status.path}}</p>
+</div>
+</div>
+
+<div class="row full-width">
+<div class="small-12 columns">
+	<h3>Memory</h3>
+	<div class="row full-width">
+		<div id="processMem" class="small-9 small-offset-1 columns"></div>
+	</div>
+	<p>
+		RSS: {{status.mem.rss | number: 2}} MB |
+		Heap Used: {{status.mem.heap.used | number: 2}} MB |
+		Heap Total: {{status.mem.heap.total | number: 2}} MB
+	</p>
+</div>
+</div>
+
+<div class="row full-width" ng-controller="menuCtrl">
+<div class="small-12 columns">
+	<h3>Environment Variables</h3>
+	<div class="row full-width" ng-show="is(0)">
+	<div class="small-4 columns" ng-repeat="(var,val) in status.env">
+		<h5><a ng-click="set([var, val])">{{var}}</a></h5>
+	</div>
+	</div>
+	<div class="row full-width" ng-hide="is(0)" ng-click="set(0)">
+	<div class="small-12 columns">
+		<h4>{{get()[0]}}</h4>
+		<p>{{get()[1]}}</p>
+	</div>
+	</div>
+</div>
+</div>
+
+</section>

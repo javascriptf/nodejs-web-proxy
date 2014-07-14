@@ -11,13 +11,22 @@
 
 
 
-// define angular module
+// module definition
 var web = angular.module('web', []);
 
 
 
-// function store
+// application data
 var app = {};
+
+// datastore
+app.data = {
+	'system': {},
+	'process': {},
+	'proxy': {},
+	'config': {},
+	'log': {}
+};
 
 
 
@@ -33,9 +42,9 @@ app.format.unit = {
 	'TB': 1 / Math.pow(1024, 4),
 
 	// time
-	's':      1,
-	'min':    1 / 60,
-	'hr':     1 / (60*60),
+	's':	  1,
+	'min':	  1 / 60,
+	'hr':	  1 / (60*60),
 	'day(s)': 1 / (60*60*24),
 
 	// fraction
@@ -46,28 +55,36 @@ app.format.unit = {
 
 // charting options
 app.chart = {};
-app.chart.datasets = [
-    {
-        label:                "Item 1",
-        fillColor:            "rgba(220,220,220,0.2)",
-        strokeColor:          "rgba(220,220,220,1)",
-        pointColor:           "rgba(220,220,220,1)",
-        pointStrokeColor:     "#fff",
-        pointHighlightFill:   "#fff",
-        pointHighlightStroke: "rgba(220,220,220,1)",
-        data: []
-    },
-    {
-        label:                "Item 2",
-        fillColor:            "rgba(151,187,205,0.2)",
-        strokeColor:          "rgba(151,187,205,1)",
-        pointColor:           "rgba(151,187,205,1)",
-        pointStrokeColor:     "#fff",
-        pointHighlightFill:   "#fff",
-        pointHighlightStroke: "rgba(151,187,205,1)",
-        data: []
-    }
-];
+app.chart.options = {
+	chart: {
+		backgroundColor: 'rgba(235,235,235,0.2)',
+		type: 'area'
+	},
+	title: {
+		text: '',
+		x: -20 // center
+	},
+	xAxis: {
+		title: {
+			text: 'X'
+		},
+		categories: null
+	},
+	yAxis: {
+		title: {
+			text: 'Y'
+		},
+		min: 0
+	},
+	tooltip: {},
+	legend: {
+		layout: 'vertical',
+		align: 'right',
+		verticalAlign: 'middle',
+		borderWidth: 0
+	},
+	series: []
+};
 
 
 
@@ -76,20 +93,20 @@ app.objbuild = {};
 
 // get a deep copied, merged JSON object
 app.objbuild.copy = function(arr) {
-    
-    // init merge string
-    var mrg = '';
+	
+	// init merge string
+	var mrg = '';
 
-    // loop through array of json objects
-    for(var i=0; i<arr.length; i++) {
+	// loop through array of json objects
+	for(var i=0; i<arr.length; i++) {
 
-        // stringify and concat with ','
-        var str = JSON.stringify(arr[i]);
-        mrg += ((i > 0)? ',':'') + str.slice(1, str.length-1);
-    }
+		// stringify and concat with ','
+		var str = JSON.stringify(arr[i]);
+		mrg += ((i > 0)? ',':'') + str.slice(1, str.length-1);
+	}
 
-    // return parsed and merged object
-    return JSON.parse('{'+mrg+'}');
+	// return parsed and merged object
+	return JSON.parse('{'+mrg+'}');
 }
 
 
@@ -103,15 +120,40 @@ app.formatData = function(data, scale, precis) {
 
 	// process single number
 	if(typeof data === 'number') {
-		return (data*sf).toPrecision(precis);
+		return (data*sf);
 	}
 
 	// process array
 	for (var i=data.length-1; i>=0; i--) {
-		data[i] = (data[i]*sf).toPrecision(precis);
+		data[i] = (data[i]*sf);
 	};
 	return data;
 }
+
+
+
+// menu controller
+web.controller('menuCtrl', ['$scope', function($scope) {
+
+	// initialize
+	var o = $scope;
+	o.value = 0;
+
+	// set menu value
+	o.set = function(val) {
+		o.value = val;
+	}
+
+	// get menu value
+	o.get = function() {
+		return o.value;
+	}
+
+	// is selected?
+	o.is = function(val) {
+		return o.value === val;
+	}
+}]);
 
 
 
@@ -143,22 +185,7 @@ web.directive('webHeader', function () {
 		templateUrl: '/html/web-header.html',
 		
 		// controller function
-		controller: function($scope) {
-
-			// initialize
-			var o = $scope;
-			o.value = 0;
-
-			// select menu
-			o.select = function(val) {
-				o.value = val;
-			}
-
-			// is selected?
-			o.is = function(val) {
-				return o.value === val;
-			}
-		}
+		controller: 'menuCtrl'
 	};
 });
 
@@ -168,49 +195,17 @@ web.directive('webHeader', function () {
 web.directive('statusHeader', function() {
 	return {
 
-		// use controller scope
-		scope: true,
-
 		// use element only
 		restrict: 'E',
 
 		// content from html
 		templateUrl: '/html/status-header.html',
-
-		// controller function
-		controller: function($scope) {
-
-			// initialize
-			var o = $scope;
-			o.menu   = { 'value': 0 };
-			o.button = { 'value': false };
-
-			// select menu
-			o.menu.select = function(val) {
-				o.menu.value = val;
-			};
-
-			// is menu selected?
-			o.menu.is = function(val) {
-				return o.menu.value === val;
-			};
-
-			// toggle button
-			o.button.toggle = function() {
-				o.button.value = !o.button.value;
-			};
-
-			// is button selected?
-			o.button.is = function() {
-				return o.button.value;
-			};
-		}
 	};
 });
 
 
 
-// status-system directive
+// system-status directive
 web.directive('systemStatus', ['$http', function($http) {
 	return {
 
@@ -228,29 +223,30 @@ web.directive('systemStatus', ['$http', function($http) {
 
 			// initialize
 			var o = $scope;
+			o.active = false;
 
-            
-            
+			
+			
 			// format status data (scale)
 			o.formatStatus = function() {
-				o.status.time   = app.formatData(o.status.time,   'hr', 3);
-				o.status.uptime = app.formatData(o.status.uptime, 'hr', 3);
-				o.status.load = app.formatData(o.status.load, '%', 3);
-				o.status.mem.free  = app.formatData(o.status.mem.free,  'GB', 3);
-				o.status.mem.total = app.formatData(o.status.mem.total, 'GB', 3);
+				o.status.time	= app.formatData(o.status.time,	  'hr');
+				o.status.uptime = app.formatData(o.status.uptime, 'hr');
+				o.status.load = app.formatData(o.status.load, '%');
+				o.status.mem.free  = app.formatData(o.status.mem.free,	'GB');
+				o.status.mem.total = app.formatData(o.status.mem.total, 'GB');
 			};
 
-            
-            
+			
+			
 			// format history data (scale)
 			o.formatHistory = function() {
-				app.formatData(o.history.time, 'hr', 4);
-				app.formatData(o.history.load, '%', 4)
-				app.formatData(o.history.mem.free, 'GB', 4);
+				app.formatData(o.history.time, 'hr');
+				app.formatData(o.history.load, '%')
+				app.formatData(o.history.mem.free, 'GB');
 			};
 
-            
-            
+			
+			
 			// update system status
 			o.updateStatus = function() {
 				$http.get('/api/data?system.status').success(function(data) {
@@ -261,113 +257,408 @@ web.directive('systemStatus', ['$http', function($http) {
 				});
 			};
 
-            
-            
-            // update system history
-            o.updateHistory = function() {
-                $http.get('/api/data?system.history').success(function(data) {
-                   
-                    // initialize and format
-                    o.history = data[0];
-                    o.formatHistory();
-                    
-                    // create charts
-                    if(!o.loadChart) {
-                        
-                        // get canvas functionality
-                        
-                        // set chart options
-                        var options = {
-                            labels: o.history.time,
-                            datasets: [app.objbuild.copy([app.chart.datasets[0]])]
-                        };
-                        
-                        // initialize line chart
-                        $('#systemLoadChart').highcharts({
-                            chart: {
-                                type: 'area'
-                            },
-                            title: {
-                                text: 'US and USSR nuclear stockpiles'
-                            },
-                            subtitle: {
-                                text: 'Source: <a href="http://thebulletin.metapress.com/content/c4120650912x74k7/fulltext.pdf">'+
-                                    'thebulletin.metapress.com</a>'
-                            },
-                            xAxis: {
-                                allowDecimals: false,
-                                labels: {
-                                    formatter: function() {
-                                        return this.value; // clean, unformatted number for year
-                                    }
-                                }
-                            },
-                            yAxis: {
-                                title: {
-                                    text: 'Nuclear weapon states'
-                                },
-                                labels: {
-                                    formatter: function() {
-                                        return this.value / 1000 +'k';
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                pointFormat: '{series.name} produced <b>{point.y:,.0f}</b><br/>warheads in {point.x}'
-                            },
-                            plotOptions: {
-                                area: {
-                                    pointStart: 1940,
-                                    marker: {
-                                        enabled: false,
-                                        symbol: 'circle',
-                                        radius: 2,
-                                        states: {
-                                            hover: {
-                                                enabled: true
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            series: [{
-                                name: 'USA',
-                                data: [null, null, null, null, null, 6 , 11, 32, 110, 235, 369, 640,
-                                    1005, 1436, 2063, 3057, 4618, 6444, 9822, 15468, 20434, 24126,
-                                    27387, 29459, 31056, 31982, 32040, 31233, 29224, 27342, 26662,
-                                    26956, 27912, 28999, 28965, 27826, 25579, 25722, 24826, 24605,
-                                    24304, 23464, 23708, 24099, 24357, 24237, 24401, 24344, 23586,
-                                    22380, 21004, 17287, 14747, 13076, 12555, 12144, 11009, 10950,
-                                    10871, 10824, 10577, 10527, 10475, 10421, 10358, 10295, 10104 ]
-                            }, {
-                                name: 'USSR/Russia',
-                                data: [null, null, null, null, null, null, null , null , null ,null,
-                                5, 25, 50, 120, 150, 200, 426, 660, 869, 1060, 1605, 2471, 3322,
-                                4238, 5221, 6129, 7089, 8339, 9399, 10538, 11643, 13092, 14478,
-                                15915, 17385, 19055, 21205, 23044, 25393, 27935, 30062, 32049,
-                                33952, 35804, 37431, 39197, 45000, 43000, 41000, 39000, 37000,
-                                35000, 33000, 31000, 29000, 27000, 25000, 24000, 23000, 22000,
-                                21000, 20000, 19000, 18000, 18000, 17000, 16000]
-                            }]
-                        });
-                        o.loadChart.options = options;
-                    }
-                    
-                    // drop new data into chart and update
-                    // o.loadChart.options.datasets[0].data = [0, 1, 2, 3]; // o.history.load;
-                    o.loadChart.update();
-                });
-            };
 
-            
-            
+
+			// initialize system load chart
+			o.initLoadChart = function() {
+
+				// set default options
+				var options = app.objbuild.copy([app.chart.options]);
+				options.xAxis.title.text = 'Time';
+				options.yAxis.title.text = 'Load (%)';
+				options.yAxis.max = 100;
+				options.tooltip.formatter = function() {
+					return this.y.toFixed(2)+' %';
+				};
+				options.series = [{ name: 'Load', data: o.history.load }];
+
+				// create chart and set
+				$('#systemLoad').highcharts(options);
+				o.loadChart = $('#systemLoad').highcharts();
+			};
+
+
+
+			// initialize system memory chart
+			o.initMemChart = function() {
+
+				// set default options
+				var options = app.objbuild.copy([app.chart.options]);
+				options.xAxis.title.text = 'Time';
+				options.yAxis.title.text = 'Memory (GB)';
+				options.yAxis.max = o.status.mem.total;
+				options.tooltip.formatter = function() {
+					return this.y.toFixed(2)+' GB';
+				};
+				options.series = [{ name: 'Free', data: o.history.mem.free }];
+
+				// create chart and set
+				$('#systemMem').highcharts(options);
+				o.memChart = $('#systemMem').highcharts();
+			};
+
+
+			
+			// update system history
+			o.updateHistory = function() {
+				$http.get('/api/data?system.history').success(function(data) {
+				   
+					// initialize and format
+					o.history = data[0];
+					o.formatHistory();
+				
+					// initialize charts if required
+					if(!o.loadChart) o.initLoadChart();
+					if(!o.memChart) o.initMemChart();
+
+					// update all charts
+					o.loadChart.series[0].setData(o.history.load);
+					o.memChart.series[0].setData(o.history.mem.free);
+				});
+			};
+
+
+
 			// initialize data
 			o.updateStatus();
-            o.updateHistory();
+			o.updateHistory();
 
 			// update every 5 seconds
 			setInterval(o.updateStatus, 5*1000);
-            setInterval(o.updateHistory, 1*60*1000);
+			setInterval(o.updateHistory, 1*60*1000);
+		}
+	};
+}]);
+
+
+
+// process-status directive
+web.directive('processStatus', ['$http', function($http) {
+	return {
+
+		// use controller scope
+		scope: true,
+
+		// use element only
+		restrict: 'E',
+
+		// content from html
+		templateUrl: '/html/process-status.html',
+
+		// controller function
+		controller: function($scope) {
+
+			// initialize
+			var o = $scope;
+
+			
+			
+			// format status data (scale)
+			o.formatStatus = function() {
+				o.status.time	= app.formatData(o.status.time,	  'hr');
+				o.status.start  = app.formatData(o.status.start,  'hr');
+				o.status.uptime = app.formatData(o.status.uptime, 'hr');
+				o.status.mem.rss        = app.formatData(o.status.mem.rss,	      'MB');
+				o.status.mem.heap.used  = app.formatData(o.status.mem.heap.used,  'MB');
+				o.status.mem.heap.total = app.formatData(o.status.mem.heap.total, 'MB');
+				if(o.status.env['Path']) o.status.env['Path'] = o.status.env['Path'].replace(/;/g, '; ');
+			};
+
+			
+			
+			// format history data (scale)
+			o.formatHistory = function() {
+				app.formatData(o.history.time, 'hr');
+				app.formatData(o.history.mem.rss,        'MB');
+				app.formatData(o.history.mem.heap.used,  'MB');
+				app.formatData(o.history.mem.heap.total, 'MB');
+			};
+
+			
+			
+			// update process status
+			o.updateStatus = function() {
+				$http.get('/api/data?process.status').success(function(data) {
+
+					// initialize and format
+					o.status = data[0];
+					o.formatStatus();
+				});
+			};
+
+
+			// initialize process memory chart
+			o.initMemChart = function() {
+
+				// set default options
+				var options = app.objbuild.copy([app.chart.options]);
+				options.xAxis.title.text = 'Time';
+				options.yAxis.title.text = 'Memory (MB)';
+				options.tooltip.formatter = function() {
+					return this.y.toFixed(2)+' MB';
+				};
+				options.series = [
+					{ name: 'RSS', data: o.history.mem.rss },
+					{ name: 'Heap Total', data: o.history.mem.heap.total },
+					{ name: 'Heap Used', data: o.history.mem.heap.used }
+				];
+
+				// create chart and set
+				$('#processMem').highcharts(options);
+				o.memChart = $('#processMem').highcharts();
+			};
+
+
+			
+			// update process history
+			o.updateHistory = function() {
+				$http.get('/api/data?process.history').success(function(data) {
+				   
+					// initialize and format
+					o.history = data[0];
+					o.formatHistory();
+				
+					// initialize charts if required
+					if(!o.memChart) o.initMemChart();
+
+					// update all charts
+					o.memChart.series[0].setData(o.history.mem.rss, false);
+					o.memChart.series[1].setData(o.history.mem.heap.total, false);
+					o.memChart.series[2].setData(o.history.mem.heap.used, true);
+				});
+			};
+
+
+
+			// initialize data
+			o.updateStatus();
+			o.updateHistory();
+
+			// update every 5 seconds
+			setInterval(o.updateStatus, 5*1000);
+			setInterval(o.updateHistory, 1*60*1000);
+		}
+	};
+}]);
+
+
+
+// request-details directive
+web.directive('requestDetails', function() {
+	return {
+
+		// use element only
+		restrict: 'E',
+
+		// content from html
+		templateUrl: '/html/request-details.html',
+	};
+});
+
+
+
+// response-details directive
+web.directive('responseDetails', function() {
+	return {
+
+		// use element only
+		restrict: 'E',
+
+		// content from html
+		templateUrl: '/html/response-details.html',
+	};
+});
+
+
+
+// proxy-status directive
+web.directive('proxyStatus', ['$http', function($http) {
+	return {
+
+		// use controller scope
+		scope: true,
+
+		// use element only
+		restrict: 'E',
+
+		// content from html
+		templateUrl: '/html/proxy-status.html',
+
+		// controller function
+		controller: function($scope) {
+
+			// initialize
+			var o = $scope;
+
+			
+			
+			// update proxy status
+			o.updateStatus = function() {
+				$http.get('/api/data?proxy.status&proxy.record').success(function(data) {
+
+					// initialize
+					o.status = data[0];
+					o.record = data[1]
+				});
+			};
+
+
+
+			// initialize proxy client chart
+			o.initClientChart = function() {
+
+				// set default options
+				var options = app.objbuild.copy([app.chart.options]);
+				options.xAxis.title.text = 'Time';
+				options.yAxis.title.text = 'Number';
+				options.tooltip.formatter = function() {
+					return this.y+'';
+				};
+				options.series = [
+					{ name: 'Requests', data: o.history.client.request },
+					{ name: 'Responses', data: o.history.client.response }
+				];
+
+				// create chart and set
+				$('#proxyClient').highcharts(options);
+				o.clientChart = $('#proxyClient').highcharts();
+			};
+
+
+
+			// initialize proxy proxy chart
+			o.initProxyChart = function() {
+
+				// set default options
+				var options = app.objbuild.copy([app.chart.options]);
+				options.xAxis.title.text = 'Time';
+				options.yAxis.title.text = 'Number';
+				options.tooltip.formatter = function() {
+					return this.y+'';
+				};
+				options.series = [
+					{ name: 'Requests', data: o.history.proxy.request },
+					{ name: 'Responses', data: o.history.proxy.response }
+				];
+
+				// create chart and set
+				$('#proxyProxy').highcharts(options);
+				o.proxyChart = $('#proxyProxy').highcharts();
+			};
+
+
+			
+			// update proxy history
+			o.updateHistory = function() {
+				$http.get('/api/data?proxy.history').success(function(data) {
+				   
+					// initialize and format
+					o.history = data[0];
+				
+					// initialize charts if required
+					if(!o.clientChart) o.initClientChart();
+					if(!o.proxyChart) o.initProxyChart();
+
+					// update all charts
+					o.clientChart.series[0].setData(o.history.client.request, false);
+					o.clientChart.series[1].setData(o.history.client.response, false);
+					o.proxyChart.series[0].setData(o.history.proxy.request, false);
+					o.proxyChart.series[1].setData(o.history.proxy.response, true);
+				});
+			};
+
+
+
+			// initialize data
+			o.updateStatus();
+			o.updateHistory();
+
+			// update every 5 seconds
+			setInterval(o.updateStatus, 1*60*1000);
+			setInterval(o.updateHistory, 1*60*1000);
+		}
+	};
+}]);
+
+
+
+// log-status directive
+web.directive('logStatus', ['$http', function($http) {
+	return {
+
+		// use controller scope
+		scope: true,
+
+		// use element only
+		restrict: 'E',
+
+		// content from html
+		templateUrl: '/html/log-status.html',
+
+		// controller function
+		controller: function($scope) {
+
+			// initialize
+			var o = $scope;
+
+
+
+			// update logs
+			o.update = function() {
+				$http.get('/api/data?log.data').success(function(data) {
+
+					// initialize
+					o.data = data[0];
+				});
+			};
+
+
+
+			// initialize data
+			o.update();
+
+			// update every 5 seconds
+			setInterval(o.update, 5*1000);
+		}
+	};
+}]);
+
+
+
+// config-status directive
+web.directive('configStatus', ['$http', function($http) {
+	return {
+
+		// use controller scope
+		scope: true,
+
+		// use element only
+		restrict: 'E',
+
+		// content from html
+		templateUrl: '/html/config-status.html',
+
+		// controller function
+		controller: function($scope) {
+
+			// initialize
+			var o = $scope;
+
+
+
+			// update logs
+			o.update = function() {
+				$http.get('/api/data?config').success(function(data) {
+
+					// initialize
+					o.data = data[0];
+				});
+			};
+
+
+
+			// initialize data
+			o.update();
 		}
 	};
 }]);

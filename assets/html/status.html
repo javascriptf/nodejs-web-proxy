@@ -9,7 +9,7 @@
 	<link rel="stylesheet" href="/css/web.css" />
 	<script src="/js/jquery.min.js"></script>
 	<script src="/js/angular.min.js"></script>
-	<script src="js/highcharts.js"></script>
+	<script src="/js/highcharts.js"></script>
 	<script src="/js/web.js"></script>
 	<link rel="shortcut icon" href="/favicon.ico" />
 	<title>Status | Web Proxy</title>
@@ -18,14 +18,18 @@
 <body ng-app="web">
 
 <header>
-	<web-header ng-init="select(2)"></web-header>
-	<status-header></status-header>
+	<web-header ng-init="set(2)"></web-header>
 </header>
 
 
-<main>
-<section class="message info">
-	<system-status></system-status>
+<main ng-controller="menuCtrl">
+<status-header></status-header>
+<section class="info">
+	<system-status ng-show="is(0)"></system-status>
+	<process-status ng-show="is(1)"></process-status>
+	<proxy-status ng-show="is(2)"></proxy-status>
+	<config-status ng-show="is(3)"></config-status>
+	<log-status ng-show="is(4)"></log-status>
 </section>
 </main>
 

@@ -36,6 +36,14 @@ module.exports = function(dep, inj) {
 		res.sendfile('assets/html/status.html');
 	});
 
+
+	// disclaimer page
+	web.get('/disclaimer', function(req, res) {
+		log.write('Disclaimer Web Page accessed.');
+		res.sendfile('assets/html/disclaimer.html');
+	});
+
+
 	// get request headers
 	web.all('/api/request/headers', function(req, res) {
 		log.write('Request [headers] API accessed.');

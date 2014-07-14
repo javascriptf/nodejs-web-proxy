@@ -1,0 +1,44 @@
+<div class="row full-width">
+<div class="small-5 small-offset-2 columns">
+	<h4>Status</h4>
+	<p>{{o.status}}</p>
+</div>
+<div class="small-5 columns">
+	<h4>Version</h4>
+	<p>{{o.version}}</p>
+</div>
+</div>
+
+<div class="row full-width" ng-controller="menuCtrl">
+<div class="small-12 columns">
+	<h4>Headers</h4>
+	<div class="row full-width" ng-show="is(0)">
+	<div class="small-4 columns" ng-repeat="(key,val) in o.headers">
+		<h5><a ng-click="set([key,val])">{{key}}</a></h5>
+	</div>
+	</div>
+	<div class="row full-width" ng-hide="is(0)" ng-click="set(0)">
+	<div class="small-12 columns">
+		<h4>{{get()[0]}}</h4>
+		<p>{{get()[1]}}</p>
+	</div>
+	</div>
+</div>
+</div>
+
+<div class="row full-width" ng-controller="menuCtrl">
+<div class="small-12 columns">
+	<h4>Trailers</h4>
+	<div class="row full-width" ng-show="is(0)">
+	<div class="small-4 columns" ng-repeat="(key,val) in o.trailers">
+		<h5><a ng-click="set([key,val])">{{key}}</a></h5>
+	</div>
+	</div>
+	<div class="row full-width" ng-hide="is(0)" ng-click="set(0)">
+	<div class="small-12 columns">
+		<h4>{{get()[0]}}</h4>
+		<p>{{get()[1]}}</p>
+	</div>
+	</div>
+</div>
+</div>

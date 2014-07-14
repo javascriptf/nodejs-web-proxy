@@ -59,8 +59,9 @@ module.exports = function(dep, inj) {
 			var qry = req.url.slice(i+1).split('&');
 			
 			// log and retrun json array response
-			log.write('URL API query with '+qry.length+' requests.');
-			res.json(getData(qry)); return;
+			log.write('URL API query: ['+req.url.slice(i+1)+'].');
+			res.json(getData(qry));
+			return;
 		}
 
 		// it is json request
@@ -81,7 +82,7 @@ module.exports = function(dep, inj) {
 				var qry = JSON.parse(buff);
 
 				// log and repond with json array
-				log.write('JSON API query with '+qry.length+' requests.');
+				log.write('JSON API query: ['+buff+'].');
 				res.json(getData(qry));
 			}
 

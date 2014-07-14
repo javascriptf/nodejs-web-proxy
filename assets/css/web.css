@@ -5805,45 +5805,50 @@ footer .row {
 footer .side-nav li {
   float: right; }
 
-.message {
+.banner {
   padding-top: 8em;
   padding-bottom: 8em; }
+  .banner h1 {
+    margin-bottom: 1em; }
+  .banner p {
+    margin-top: 2em;
+    margin-bottom: 2em; }
+  .banner a {
+    margin-top: 2em;
+    margin-bottom: 2em; }
 
-.message h1 {
-  margin-bottom: 1em; }
-
-.message p {
-  margin-top: 2em;
-  margin-bottom: 2em; }
-
-.message a {
-  margin-top: 2em;
-  margin-bottom: 2em; }
-
-section.warning {
+.warning {
   background-color: #EEEEAA; }
 
-section.important {
+.important {
   text-align: center;
   background-color: #AAAAEE; }
-
-.important p {
-  font-family: "Open Sans", "Trebuchet MS", sans-serif;
-  font-size: 1.2em; }
+  .important p {
+    font-family: "Open Sans", "Trebuchet MS", sans-serif;
+    font-size: 1.2em; }
 
 .icon-bar .active {
   background-color: #6666AA; }
 
 .info {
+  padding-top: 2em;
+  padding-bottom: 2em;
   background-color: #EEE; }
-
-.info .columns:hover {
-  background-color: #F2F2F2; }
-
-.info h3 {
-  margin-top: 1em;
-  margin-bottom: 1em;
-  font-size: 3em; }
-
-.info p {
-  font-size: 2em; }
+  .info a:hover {
+    text-decoration: underline; }
+  .info .columns:hover {
+    background-color: rgba(250, 250, 250, 0.5); }
+  .info h3, .info h4 {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    font-size: 2em;
+    color: #448; }
+  .info h4 {
+    font-size: 1.5em;
+    color: #337; }
+  .info p, .info ol > li {
+    font-size: 1.2em;
+    color: #303030;
+    overflow: auto; }
+  .info ol {
+    list-style: initial; }

@@ -327,6 +327,7 @@ module.exports = function(dep, inj) {
 
 			// log transfer (proxy request)
 			o.recProxyReq(id, {
+				'url': 		   addr.href,
 				'method':      req.method,
 				'headers':     hdr,
 				'httpVersion': req.httpVersion,

@@ -36,8 +36,12 @@ module.exports = function(dep, inj) {
 
 
 	// return
-	if(typeof inj != 'undefined') {
-		inj = o;
+	if(typeof inj !== 'undefined') {
+		inj.usrAgent = o.usrAgent;
+		inj.port = o.port;
+		inj.timeout = o.timeout;
+		inj.statusUpdateTime = o.statusUpdateTime;
+		inj.historyUpdateTime = o.historyUpdateTime;
 	}
 	return o;
 }

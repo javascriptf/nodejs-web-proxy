@@ -1,0 +1,117 @@
+<section class="info row full-width text-center">
+
+<div class="row full-width">
+<div class="small-6 columns">
+	<h3>Client</h3>
+	<div id="proxyClient"></div>
+	<p>Requests: {{status.client.request}} | Responses: {{status.client.response}}</p>
+</div>
+<div class="small-6 columns">
+	<h3>Proxy</h3>
+	<div id="proxyProxy"></div>
+	<p>Requests: {{status.proxy.request}} | Responses: {{status.proxy.response}}</p>
+</div>
+</div>
+
+<div class="row full-width">
+<div class="small-6 columns">
+	<h3>Pending</h3>
+	<p>{{status.pending}}</p>
+</div>
+<div class="small-6 columns">
+	<h3>Failed</h3>
+	<p>{{status.failed}}</p>
+</div>
+</div>
+
+<div class="row full-widths" ng-controller="menuCtrl">
+<div class="small-12 columns">
+	<h3>Record</h3>
+	<div class="row full-width" ng-click="set(0)">
+	<div class="small-2 columns">
+		<h4>ID</h4>
+		<p ng-hide="is(0)">{{get()[0].id}}</p>
+	</div>
+	<div class="small-5 columns">
+		<h4>Client</h4>
+		<div class="row full-width">
+		<div class="small-6 columns">
+			<h4>Request</h4>
+			<h6 ng-hide="is(0)">At {{get()[0].client.request.time}} s</h6>
+		</div>
+		<div class="small-6 columns">
+			<h4>Response</h4>
+			<h6 ng-hide="is(0)">At {{get()[0].client.response.time}} s</h6>
+		</div>
+		</div>
+	</div>
+	<div class="small-5 columns">
+		<h4>Proxy</h4>
+		<div class="row full-width">
+		<div class="small-6 columns">
+			<h4>Request</h4>
+			<h6 ng-hide="is(0)">At {{get()[0].proxy.request.time}} s</h6>
+		</div>
+		<div class="small-6 columns">
+			<h4>Response</h4>
+			<h6 ng-hide="is(0)">At {{get()[0].proxy.response.time}} s</h6>
+		</div>
+		</div>
+	</div>
+	</div>
+	<div ng-show="is(0)">
+	<div class="row full-width warning" ng-repeat="txr in record.failed">
+		<div class="small-2 columns"><h6>{{txr.id}}</h6></div>
+		<div class="small-5 columns">
+			<div class="row full-width">
+				<div class="small-6 columns"><h6>
+					<a ng-click="set([txr,0,txr.client.request])">At {{txr.client.request.time}} s</a>
+				</h6></div>
+				<div class="small-6 columns"><h6>
+					<a ng-click="set([txr,1,txr.client.response])">At {{txr.client.response.time}} s</a>
+				</h6></div>
+			</div>
+		</div>
+		<div class="small-5 columns">
+			<div class="row full-width">
+				<div class="small-6 columns"><h6>
+					<a ng-click="set([txr,0,txr.proxy.request])">At {{txr.proxy.request.time}} s</a>
+				</h6></div>
+				<div class="small-6 columns"><h6>
+					<a ng-click="set([txr,1,txr.proxy.response])">At {{txr.proxy.response.time}} s</a>
+				</h6></div>
+			</div>
+		</div>
+	</div>
+	<div class="row full-width" ng-repeat="txr in record.active">
+		<div class="small-2 columns"><h6>{{txr.id}}</h6></div>
+		<div class="small-5 columns">
+			<div class="row full-width">
+				<div class="small-6 columns"><h6>
+					<a ng-click="set([txr,0,txr.client.request])">At {{txr.client.request.time}} s</a>
+				</h6></div>
+				<div class="small-6 columns"><h6>
+					<a ng-click="set([txr,1,txr.client.response])">At {{txr.client.response.time}} s</a>
+				</h6></div>
+			</div>
+		</div>
+		<div class="small-5 columns">
+			<div class="row full-width">
+				<div class="small-6 columns"><h6>
+					<a ng-click="set([txr,0,txr.proxy.request])">At {{txr.proxy.request.time}} s</a>
+				</h6></div>
+				<div class="small-6 columns"><h6>
+					<a ng-click="set([txr,1,txr.proxy.response])">At {{txr.proxy.response.time}} s</a>
+				</h6></div>
+			</div>
+		</div>
+	</div>
+	</div>
+	<div ng-hide="is(0)">
+		<request-details ng-show="get()[1] === 0" ng-repeat="o in [get()[2]]"></request-details>
+		<response-details ng-show="get()[1] === 1" ng-repeat="o in [get()[2]]"></response-details>
+	</div>
+</div>
+</div>
+
+</section>
