@@ -44,6 +44,13 @@ module.exports = function(dep, inj) {
 	});
 
 
+	// getting started page
+	web.get('/start', function(req, res) {
+		log.write('Getting Started Web Page accessed.');
+		res.sendfile('assets/html/getting-started.html');
+	});
+
+
 	// get request headers
 	web.all('/api/request/headers', function(req, res) {
 		log.write('Request [headers] API accessed.');

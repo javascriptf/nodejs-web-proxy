@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<link rel="stylesheet" href="/css/font-awesome.min.css">
+	<link rel="stylesheet" href="/css/web.css"/>
+	<script src="/js/jquery.min.js"></script>
+	<script src="/js/angular.min.js"></script>
+	<script src="/js/web.js"></script>
+	<link rel="shortcut icon" href="/favicon.ico" />
+	<title>404 | WebProxy</title>
+</head>
+
+<body ng-app="web">
+
+<header>
+	<web-header ng-init="set(1)"></web-header>
+</header>
+
+
+<main>
+<section class="banner important">
+	<div class="row">
+	<div class="small-8 small-centered text-left columns">
+		<h1>Getting Started</h1>
+		<p>
+		<ol>
+			<li>Install Node.js, a javascript-based server platform.</li>
+			<li>Make sure config/helper.json is present (settings).</li>
+			<li>
+				Open a Command Prompt in this folder and enter:
+				> node helper.js
+			</li>
+			<li>
+				Now configure your browser / application with proxy settings:
+				server address: 127.0.0.1
+				server port: 80
+			</li>
+			<li>Its done. Time to test.</li>
+		</ol>
+ 		</p>
+		<a href="/" class="button">Return to home page</a>
+	</div>
+	</div>
+</section>
+</main>
+
+
+<footer>
+	<web-footer></web-footer>
+</footer>
+
+</body>
+
+</html>

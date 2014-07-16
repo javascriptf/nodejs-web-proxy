@@ -5,7 +5,7 @@
 	"remote": {
 		"port": 80,
 		"path": "/proxy",
-		"host": "127.0.0.1",
+		"host": "webproxy-20320.onmodulus.net",
 		"server": "Server: Apache/2.4.1 (Unix)"
 	}
 }
