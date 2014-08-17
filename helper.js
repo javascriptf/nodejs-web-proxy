@@ -181,7 +181,7 @@ app.handleReq = function(req, res) {
 	};
 	
 	// send request to proxy
-	var pReq = http.request(options, function (pRes) {
+	var pReq = http.request(options, function(pRes) {
 		app.handleRes(id, res, pRes);
 	});
 	
