@@ -213,7 +213,7 @@ module.exports = function(dep, inj) {
 
 
 	// handle response from server
-	o.handleRes = function(id, res, pRes) {
+	o.handleRes = function(id, res, pRes, mode) {
 		
 		// record transfer (response to proxy)
 		o.recProxyRes(id, pRes);
@@ -224,14 +224,9 @@ module.exports = function(dep, inj) {
 		// log start of response to proxy
 		log.write('['+id+'] Response to Proxy started.');
 		
-		// save content-length in server http header
-		hdr['server'] = hdr['content-length']? hdr['content-length'] : '?';
-		
-		// set transfer encoding to chunked, if not set
-		if(!hdr['transfer-encoding']) hdr['transfer-encoding'] = 'chunked';
-
-		// remove bad headers
-		delete hdr['content-length'];
+		// save content-type in server http header
+		hdr['server'] = hdr['content-type']? hdr['content-type'] : '?';
+		hdr['content-type'] = 'text/plain';
 
 		// on response error, log and end response
 		res.on('error', function(err) {
@@ -270,16 +265,22 @@ module.exports = function(dep, inj) {
 
 
 	// handle request from client
-	o.handleReq = function(req, res) {
+	o.handleReq = function(req, res, mode) {
 
 		// log transfer (client request) and get id
 		var id = o.recClientReq(req);
 		
 		// get request address (href)
 		var hdr = req.headers;
-		var addr = url.parse(hdr['user-agent']);
+		var rurl = (mode === 'web')?
+			hdr['user-agent'] : req.query['url'];
+		if(rurl === null || rurl === undefined) {
+			res.send(404, 'invalid request url: '+rurl);
+			return;
+		}
 
 		// update header information
+		addr = url.parse(rurl);
 		hdr['user-agent'] = config.usrAgent;
 		hdr['host'] = addr.host;
 
@@ -299,7 +300,7 @@ module.exports = function(dep, inj) {
 
 		// make request to remote server and handle reponse
 		var pReq = http.request(options, function(pRes) {
-			o.handleRes(id, res, pRes);
+			o.handleRes(id, res, pRes, mode);
 		});
 
 		// on error with request send internal error message to client

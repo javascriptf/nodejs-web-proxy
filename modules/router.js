@@ -53,7 +53,6 @@ module.exports = function(dep, inj) {
 
 	// get request headers
 	web.all('/api/request/headers', function(req, res) {
-		log.write('Request [headers] API accessed.');
 		res.json({
 			'method': 	req.method,
 			'addr': 	req.url,
@@ -64,15 +63,19 @@ module.exports = function(dep, inj) {
 
 	// data api access
 	web.get('/api/data', function(req, res) {
-		log.write('Data API accessed.');
 		api.onDataReq(req, res);
 	});
 
 	
-	// proxy access
+	// web proxy access
 	web.all('/proxy', function(req, res) {
-		log.write('Proxy accessed.');
-		proxy.handleReq(req, res);
+		log.write('Web Proxy accessed.');
+		proxy.handleReq(req, res, 'web');
+	});
+
+	web.all('/file', function(req, res) {
+		log.write('File Proxy accessed.');
+		proxy.handleReq(req, res, 'file');
 	});
 
 
