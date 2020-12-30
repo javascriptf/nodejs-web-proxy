@@ -1,13 +1,7 @@
-/* --------------
- * Object Builder
- * --------------
- * 
- * Provides convenient functions for building objects.
- * 
- * License:
- * Web Proxy, Copyright (c) 2010-2014, Subhajit Sahu, All Rights Reserved.
- * see: /LICENSE.txt for details.
- */
+// Object Builder
+// --------------
+// 
+// Provides convenient functions for building objects.
 
 
 module.exports = function(dep, inj) {

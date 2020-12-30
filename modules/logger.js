@@ -1,14 +1,8 @@
-/* ------
- * Logger
- * ------
- * 
- * Provides a log module that can be used to log information. Multiple
- * types of logs can be used but all logs are output into the console.
- * 
- * License:
- * Web Proxy, Copyright (c) 2010-2014, Subhajit Sahu, All Rights Reserved.
- * see: /LICENSE.txt for details.
- */
+// Logger
+// ------
+// 
+// Provides a log module that can be used to log information. Multiple
+// types of logs can be used but all logs are output into the console.
 
 
 module.exports = function(dep, inj) {

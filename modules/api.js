@@ -1,13 +1,6 @@
-/* ---------------
- * Application API
- * ---------------
- * 
- * Provides a API that can be used to access application data.
- * 
- * License:
- * Web Proxy, Copyright (c) 2010-2014, Subhajit Sahu, All Rights Reserved.
- * see: /LICENSE.txt for details.
- */
+// Application API
+// ---------------
+// Provides a API that can be used to access application data.
 
 
 module.exports = function(dep, inj) {

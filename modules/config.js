@@ -1,13 +1,7 @@
-/* -------------------------
- * Application Configuration
- * -------------------------
- * 
- * Provides most configuration information used by the application to operate.
- * 
- * License:
- * Web Proxy, Copyright (c) 2010-2014, Subhajit Sahu, All Rights Reserved.
- * see: /LICENSE.txt for details.
- */
+// Application Configuration
+// -------------------------
+// 
+// Provides most configuration information used by the application to operate.
 
 
 module.exports = function(dep, inj) {

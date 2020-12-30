@@ -1,14 +1,6 @@
-/* ----------------
- * Main Application
- * ----------------
- * 
- * This is the main application file.
- * 
- * License:
- * Web Proxy, Copyright (c) 2010-2014, Subhajit Sahu, All Rights Reserved.
- * see: /LICENSE.txt for details.
- */
-
+// Main Application
+// ----------------
+// This is the main application file.
 
 
 // datastore

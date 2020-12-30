@@ -1,14 +1,14 @@
 {
-  "name": 			"web_Proxy",
-  "version" : 		"0.0.1",
-  "description" : 	"Basic proxy server",
-  "repository" :
-  {
-  	"type": "git",
-  	"url": "git://github.com/wolfram77/web_Proxy.git"
+  "name": "proxy",
+  "private": true,
+  "version": "0.0.2",
+  "main": "app.js",
+  "description": "Basic proxy server",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wolfram77/web_Proxy.git"
   },
-  "dependencies" :
-  {
-  	"express": 		"4.4.4"
+  "dependencies": {
+    "express": "4.17.1"
   }
 }

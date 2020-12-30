@@ -1,13 +1,7 @@
-/* -----------------
- * System Monitoring
- * -----------------
- * 
- * Monitors current system and provides information about it.
- * 
- * License:
- * Web Proxy, Copyright (c) 2010-2014, Subhajit Sahu, All Rights Reserved.
- * see: /LICENSE.txt for details.
- */
+// System Monitoring
+// -----------------
+// 
+// Monitors current system and provides information about it.
 
 
 // dependencies

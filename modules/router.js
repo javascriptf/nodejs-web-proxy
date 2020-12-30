@@ -1,13 +1,7 @@
-/* -------------
- * Router (HTTP)
- * -------------
- * 
- * Routes a request path to appropriate handler.
- * 
- * License:
- * Web Proxy, Copyright (c) 2010-2014, Subhajit Sahu, All Rights Reserved.
- * see: /LICENSE.txt for details.
- */
+// Router (HTTP)
+// -------------
+// 
+// Routes a request path to appropriate handler.
 
 
 // dependencies

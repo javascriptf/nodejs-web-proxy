@@ -1,29 +1,21 @@
-/* ------------------
- * Helper Application
- * ------------------
- * 
- * This application must run on the user's computer. It creates a local proxy
- * server at 127.0.0.1 (port 8080) which must be entered in proxy settings.
- * Once this is run, any proxy request it receives is relayed to a Web Proxy
- * server. Response from this external server is then received by the local, 
- * proxy server, which then delivers it to the requesting application as a
- * reponse to the application's request.
- *
- * Usage:
- * 1. Install Node.js, a javascript-based server platform.
- * 2. Make sure config/helper.json is present (settings).
- * 2. Open a Command Prompt in this folder and enter:
- *		> node helper.js
- * 3. Now configure your browser / application with proxy settings:
- *		server address: 127.0.0.1
- *		server port: 80
- * 4. Its done. Time to test.
- * 
- * License:
- * Web Proxy, Copyright (c) 2010-2014, Subhajit Sahu, All Rights Reserved.
- * see: /LICENSE.txt for details.
- */
-
+// Helper Application
+// ------------------
+// This application must run on the user's computer. It creates a local proxy
+// server at 127.0.0.1 (port 8080) which must be entered in proxy settings.
+// Once this is run, any proxy request it receives is relayed to a Web Proxy
+// server. Response from this external server is then received by the local, 
+// proxy server, which then delivers it to the requesting application as a
+// reponse to the application's request.
+// 
+// Usage:
+// 1. Install Node.js, a javascript-based server platform.
+// 2. Make sure config/helper.json is present (settings).
+// 2. Open a Command Prompt in this folder and enter:
+// 		> node helper.js
+// 3. Now configure your browser / application with proxy settings:
+// 		server address: 127.0.0.1
+// 		server port: 80
+// 4. Its done. Time to test.
 
 
 // datastore

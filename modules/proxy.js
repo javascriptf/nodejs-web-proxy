@@ -1,13 +1,7 @@
-/* -----
- * Proxy
- * -----
- * 
- * Provides an HTTP Proxy (without routing) along with its monitoring.
- * 
- * License:
- * Web Proxy, Copyright (c) 2010-2014, Subhajit Sahu, All Rights Reserved.
- * see: /LICENSE.txt for details.
- */
+// Proxy
+// -----
+// 
+// Provides an HTTP Proxy (without routing) along with its monitoring.
 
 
 // dependencies

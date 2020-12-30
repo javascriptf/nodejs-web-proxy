@@ -1,15 +1,9 @@
-/* ----------------
- * Tank: Collection
- * ----------------
- * 
- * Tank is a data structure where data flows in from one end, and flows out
- * from another end. However, due to its limited size excess inflow of data
- * would cause data near the other end to flow out.
- * 
- * License:
- * Web Proxy, Copyright (c) 2010-2014, Subhajit Sahu, All Rights Reserved.
- * see: /LICENSE.txt for details.
- */
+// Tank: Collection
+// ----------------
+// 
+// Tank is a data structure where data flows in from one end, and flows out
+// from another end. However, due to its limited size excess inflow of data
+// would cause data near the other end to flow out.
 
 
 module.exports = function(dep, inj) {	
