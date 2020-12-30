@@ -5,7 +5,7 @@
 	"remote": {
 		"port": 80,
 		"path": "/proxy",
-		"host": "web-proxys.glitch.me",
+		"host": "127.0.0.1",
 		"server": "Server: Apache/2.4.1 (Unix)"
 	}
 }
