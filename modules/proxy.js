@@ -275,7 +275,7 @@ module.exports = function(dep, inj) {
 
 		// update header information
 		addr = url.parse(rurl);
-		hdr['user-agent'] = config.usrAgent;
+		hdr['user-agent'] = config.userAgent;
 		hdr['host'] = addr.host;
 
 		// get options for remote request

@@ -1,7 +1,7 @@
 {
   "name": "proxy",
   "private": true,
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "app.js",
   "description": "Basic proxy server",
   "scripts": {

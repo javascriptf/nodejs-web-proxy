@@ -10,7 +10,7 @@ module.exports = function(dep, inj) {
 
 
 	// when proxy requests the remote server, this is the user-agent
-	o.usrAgent = 'Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0';
+	o.userAgent = 'Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0';
 	
 
 	// port number the HTTP server runs on
@@ -31,7 +31,7 @@ module.exports = function(dep, inj) {
 
 	// return
 	if(typeof inj !== 'undefined') {
-		inj.usrAgent = o.usrAgent;
+		inj.userAgent = o.userAgent;
 		inj.port = o.port;
 		inj.timeout = o.timeout;
 		inj.statusUpdateTime = o.statusUpdateTime;
