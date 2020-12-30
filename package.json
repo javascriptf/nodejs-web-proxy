@@ -1,9 +1,12 @@
 {
   "name": "proxy",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "app.js",
   "description": "Basic proxy server",
+  "scripts": {
+    "build": "sass assets/index.scss assets/index.css"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/wolfram77/web_Proxy.git"
