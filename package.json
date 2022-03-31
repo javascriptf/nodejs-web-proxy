@@ -1,11 +1,12 @@
 {
   "name": "proxy",
   "private": true,
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "app.js",
   "description": "Basic proxy server",
   "scripts": {
-    "build": "sass assets/index.scss assets/index.css"
+    "build": "sass assets/index.scss assets/index.css",
+    "start": "node ./app.js"
   },
   "repository": {
     "type": "git",
