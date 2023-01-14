@@ -1,7 +1,7 @@
 {
   "name": "proxy",
   "private": true,
-  "version": "0.0.6",
+  "version": "0.0.7",
   "main": "app.js",
   "description": "Basic proxy server",
   "scripts": {
@@ -13,6 +13,6 @@
     "url": "git://github.com/wolfram77/web_Proxy.git"
   },
   "dependencies": {
-    "express": "4.17.1"
+    "express": "4.18.2"
   }
 }
